@@ -9,7 +9,9 @@
       "Bash(\"/c/Program Files/GitHub CLI/gh\" --version)",
       "Bash(powershell.exe -Command \"gh --version\")",
       "Bash(powershell.exe -Command '& { $v = gh --version 2>&1; $v }')",
-      "Bash(powershell.exe -Command \"gh auth status\")"
+      "Bash(powershell.exe -Command \"gh auth status\")",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm tsc:*)"
     ]
   }
 }
