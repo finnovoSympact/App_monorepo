@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm typecheck:*)",
+      "Bash(npx skills:*)",
+      "Bash(gh auth:*)",
+      "Bash(gh org:*)",
+      "Bash(\"/c/ProgramData/chocolatey/bin/gh\" --version)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh\" --version)",
+      "Bash(powershell.exe -Command \"gh --version\")",
+      "Bash(powershell.exe -Command '& { $v = gh --version 2>&1; $v }')",
+      "Bash(powershell.exe -Command \"gh auth status\")"
+    ]
+  }
+}

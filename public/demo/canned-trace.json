@@ -1,0 +1,54 @@
+{
+  "prompt": "Should I buy Banque de Tunisie (BT) stock given the new foreign-currency rules?",
+  "steps": [
+    {
+      "delayMs": 400,
+      "event": {
+        "agent": "supervisor",
+        "summary": "Plan: fundamentals → news → risk",
+        "kind": "out"
+      }
+    },
+    {
+      "delayMs": 900,
+      "event": {
+        "agent": "fundamentals",
+        "summary": "BT P/E 7.4, ROE 12.1%, div yield 5.2%. Balance sheet: T1 ratio 11.8%. Stable.",
+        "kind": "out"
+      }
+    },
+    {
+      "delayMs": 700,
+      "event": {
+        "agent": "news",
+        "summary": "Dec 2025: residents now allowed FX accounts → tailwind for BT retail FX fee income.",
+        "kind": "out"
+      }
+    },
+    {
+      "delayMs": 800,
+      "event": {
+        "agent": "risk",
+        "summary": "Beta 0.62 vs TUNINDEX. 30-day VaR at 95%: −4.1%. Correlated with BNA and BIAT.",
+        "kind": "out"
+      }
+    },
+    {
+      "delayMs": 900,
+      "event": {
+        "agent": "critic",
+        "summary": "All three findings are grounded. No speculative claim detected. Approved.",
+        "kind": "out"
+      }
+    },
+    {
+      "delayMs": 1100,
+      "event": {
+        "agent": "composer",
+        "summary": "Composed final answer with citations.",
+        "kind": "out"
+      }
+    }
+  ],
+  "final": "On balance, BT looks fundamentally sound [fundamentals] and the new FX-account rule is a genuine tailwind for retail FX revenue [news]. Downside risk is moderate and typical for Tunisian banks [risk]. This is educational — not personalized advice. A reasonable next step is to model a small position (e.g. 2–5% of portfolio) and compare against BIAT or ATB before committing."
+}

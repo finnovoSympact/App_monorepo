@@ -1,0 +1,50 @@
+{
+  "$schema": "https://docs.claude.com/en/docs/claude-code/settings-schema.json",
+  "permissions": {
+    "allow": [
+      "Bash(pnpm:*)",
+      "Bash(npx:*)",
+      "Bash(git:*)",
+      "Bash(gh:*)",
+      "Bash(node:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(mkdir:*)",
+      "Bash(rm:*)",
+      "Bash(mv:*)",
+      "Bash(cp:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(curl:*)",
+      "Bash(docker:*)",
+      "Bash(psql:*)",
+      "Read(//**)",
+      "Write(//**)",
+      "Edit(//**)",
+      "WebFetch",
+      "WebSearch"
+    ],
+    "deny": [
+      "Bash(rm -rf /**)",
+      "Bash(sudo:*)",
+      "Bash(:(){ :|:&};:)"
+    ]
+  },
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pnpm prettier --write --log-level=warn ${CLAUDE_PROJECT_DIR}/$(echo \"$CLAUDE_TOOL_INPUT_FILE_PATH\" | sed 's|'${CLAUDE_PROJECT_DIR}'/||') 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}

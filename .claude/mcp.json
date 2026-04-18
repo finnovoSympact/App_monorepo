@@ -1,0 +1,17 @@
+{
+  "$schema": "https://docs.claude.com/en/docs/claude-code/mcp",
+  "mcpServers": {
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "description": "Up-to-date docs for Next.js, shadcn, LangGraph, Drizzle, etc. Use when answering API questions."
+    },
+    "shadcn": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "shadcn@latest", "mcp"],
+      "description": "Add or update shadcn/ui components from inside Claude Code without leaving the session."
+    }
+  },
+  "note": "Add these optional MCPs via Claude Code when you want them:\n- supabase: https://mcp.supabase.com/mcp (DB, auth, storage)\n- vercel:   https://mcp.vercel.com/ (deploys + logs)\n- exa:      https://mcp.exa.ai/mcp (web search in-agent)\nRun the Cowork connector UI or `claude mcp add <uuid>` from the CLI."
+}
