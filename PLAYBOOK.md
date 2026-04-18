@@ -5,11 +5,13 @@
 **Pitch format:** 5 min deck (8 sections) + 2 min recorded video demo + 20 min Q&A.
 
 > **Product scope reminder.** Sanad has three layers sharing one Postgres. Not three products — one platform.
+>
 > - **L1 Sanad Chat** — WhatsApp-style individual onboarding + SME escalation.
 > - **L2 Daiyn** — SME credit pipeline (5-node LangGraph with HITL on every node) + signed Passport.
 > - **L3 Sanad for Banks** — Matched lead feed + action dispatcher + commission ledger.
 >
 > **Demo-day scope (honest labeling for judges):**
+>
 > - L2 is **fully functional** end-to-end.
 > - L1 is **fully functional as a simulator** at `/chat`; real WhatsApp API is behind `WHATSAPP_LIVE=1` flag (not demoed).
 > - L3 is **lightweight-functional**: real DB writes, real matching, stubbed outbound send.
@@ -30,30 +32,31 @@ All three must be uploaded to the team's designated Drive folder, with ownership
 
 Assuming spec-book intake is Saturday morning and upload is Sunday 07:00:
 
-| Hour | Block | Deliverable | Layers touched |
-|---|---|---|---|
-| H0 | Spec intake → PROMPTS.md §0 pre-flight installs | Deps installed, dirs scaffolded, Ed25519 keys generated | — |
-| H0-H1 | PROMPTS.md §1 rebrand Finnovo → Sanad (Daiyn kept for L2) | Brand hierarchy clean across repo | all |
-| H1-H2 | PROMPTS.md §2 Drizzle schema all 3 layers + infra | `drizzle-kit generate` green, one migration file | all |
-| H2-H3 | PROMPTS.md §3 seed: 3 SME packs + 3 chat personas + 2 bank criteria + canned trace | Seed data loaded, dev DB playable | all |
-| H3-H6 | PROMPTS.md §4 Layer-2 5-node pipeline (Formatter/Orch/Exec/Reviewer/Finalizer) + HITL interrupts + SSE | `/playground` shows pipeline running with HITL on every node | L2 |
-| H6-H7 | PROMPTS.md §5 Layer-2 UI (upload, pipeline-graph, hitl-panel) | Upload → run → approve/refine flow feels pitch-grade | L2 |
-| H7-H8 | PROMPTS.md §6 Sanad Passport (Ed25519 sign + `/passport/[id]` + `/verify/[id]`) | QR-verifiable Passport end-to-end | L2 |
-| H8-H10 | PROMPTS.md §7 Layer-1 `/chat` simulator + persona switcher + offline replay | WhatsApp-style chat visibly working with 3 personas | L1 |
-| H10-H11 | PROMPTS.md §8 Layer-1 backend (conversational agent + tools + escalator + real API behind flag) | Tool calls visible; `raiseSMESignal` → magic-link promotion flow works | L1 |
-| H11-H12 | PROMPTS.md §9 Layer-3 dashboard + matching engine + action dispatcher + commission ledger | Bank login shows lead feed; click contact → event logged | L3 |
-| H12-H13 | PROMPTS.md §10 Landing page (3-layer story, 3 CTAs) | `/` tells the story cleanly | all |
-| **H13** | **🚨 FEATURE FREEZE** | No new files after this hour | — |
-| H13-H14 | Live-model wire-up behind `DAIYN_LIVE_MODELS=1` on a branch; if flaky, keep flag OFF | Offline canned trace is the canonical demo path | L2 |
-| H14-H15 | Polish pass: cost+latency HUD, trace panel visuals, toast/sound on approval | UI is pitch-grade | all |
-| H15-H17 | PROMPTS.md §11 deck (8 slides per spec) + speaker notes | `deck/sanad.md` → Marp → PDF | — |
-| H17-H19 | **Record demo video** (PROMPTS.md §12) | `deck/demo-video.mp4` ≤120s + `.srt` | all |
-| H19-H21 | PROMPTS.md §13 reviewer pass — fix blockers only. Q&A rehearsal against IDEAS.md defense bank | Blockers fixed; rebuttals memorized | all |
-| H21-H23 | Deck rehearsal w/ timer. Stage deliverables in Drive. Confirm ownership transfer works | Three files in Drive, owner = aiesec.tunisie.carthage@gmail.com | — |
-| H23-H24 | Submit at 07:00 (upload + transfer ownership + form) | Confirmation email screenshotted | — |
-| 09:00 | Present | Laptop mirrored, backup video on USB | — |
+| Hour    | Block                                                                                                  | Deliverable                                                            | Layers touched |
+| ------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- | -------------- |
+| H0      | Spec intake → PROMPTS.md §0 pre-flight installs                                                        | Deps installed, dirs scaffolded, Ed25519 keys generated                | —              |
+| H0-H1   | PROMPTS.md §1 rebrand Finnovo → Sanad (Daiyn kept for L2)                                              | Brand hierarchy clean across repo                                      | all            |
+| H1-H2   | PROMPTS.md §2 Drizzle schema all 3 layers + infra                                                      | `drizzle-kit generate` green, one migration file                       | all            |
+| H2-H3   | PROMPTS.md §3 seed: 3 SME packs + 3 chat personas + 2 bank criteria + canned trace                     | Seed data loaded, dev DB playable                                      | all            |
+| H3-H6   | PROMPTS.md §4 Layer-2 5-node pipeline (Formatter/Orch/Exec/Reviewer/Finalizer) + HITL interrupts + SSE | `/playground` shows pipeline running with HITL on every node           | L2             |
+| H6-H7   | PROMPTS.md §5 Layer-2 UI (upload, pipeline-graph, hitl-panel)                                          | Upload → run → approve/refine flow feels pitch-grade                   | L2             |
+| H7-H8   | PROMPTS.md §6 Sanad Passport (Ed25519 sign + `/passport/[id]` + `/verify/[id]`)                        | QR-verifiable Passport end-to-end                                      | L2             |
+| H8-H10  | PROMPTS.md §7 Layer-1 `/chat` simulator + persona switcher + offline replay                            | WhatsApp-style chat visibly working with 3 personas                    | L1             |
+| H10-H11 | PROMPTS.md §8 Layer-1 backend (conversational agent + tools + escalator + real API behind flag)        | Tool calls visible; `raiseSMESignal` → magic-link promotion flow works | L1             |
+| H11-H12 | PROMPTS.md §9 Layer-3 dashboard + matching engine + action dispatcher + commission ledger              | Bank login shows lead feed; click contact → event logged               | L3             |
+| H12-H13 | PROMPTS.md §10 Landing page (3-layer story, 3 CTAs)                                                    | `/` tells the story cleanly                                            | all            |
+| **H13** | **🚨 FEATURE FREEZE**                                                                                  | No new files after this hour                                           | —              |
+| H13-H14 | Live-model wire-up behind `DAIYN_LIVE_MODELS=1` on a branch; if flaky, keep flag OFF                   | Offline canned trace is the canonical demo path                        | L2             |
+| H14-H15 | Polish pass: cost+latency HUD, trace panel visuals, toast/sound on approval                            | UI is pitch-grade                                                      | all            |
+| H15-H17 | PROMPTS.md §11 deck (8 slides per spec) + speaker notes                                                | `deck/sanad.md` → Marp → PDF                                           | —              |
+| H17-H19 | **Record demo video** (PROMPTS.md §12)                                                                 | `deck/demo-video.mp4` ≤120s + `.srt`                                   | all            |
+| H19-H21 | PROMPTS.md §13 reviewer pass — fix blockers only. Q&A rehearsal against IDEAS.md defense bank          | Blockers fixed; rebuttals memorized                                    | all            |
+| H21-H23 | Deck rehearsal w/ timer. Stage deliverables in Drive. Confirm ownership transfer works                 | Three files in Drive, owner = aiesec.tunisie.carthage@gmail.com        | —              |
+| H23-H24 | Submit at 07:00 (upload + transfer ownership + form)                                                   | Confirmation email screenshotted                                       | —              |
+| 09:00   | Present                                                                                                | Laptop mirrored, backup video on USB                                   | —              |
 
 **Time-boxed commitments:**
+
 - If H3-H6 runs long, cut the Reviewer's "block-on-missing-source" rule to a warning. Keep 5 nodes, keep HITL.
 - If H8-H11 runs long, drop the real Meta API wire-up entirely. Simulator is fine on its own — it's the demo surface.
 - If H11-H12 runs long, drop outbound dispatch visuals — keep the feed, matching badges, and commission ledger chart.
@@ -133,6 +136,7 @@ Upload to Drive. Transfer ownership to aiesec.tunisie.carthage@gmail.com.
 Run PROMPTS.md §13 reviewer. Fix every Blocker. Accept the rest.
 
 Open IDEAS.md "Shark-Tank defense bank" and rehearse every answer with a teammate. Drill the 3-layer questions especially (they're most likely in a 20-min Q&A):
+
 - "Isn't three layers too much?"
 - "Which layer is the real product?"
 - "Why WhatsApp and not an app?"

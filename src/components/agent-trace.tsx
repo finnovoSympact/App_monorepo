@@ -54,18 +54,19 @@ export function AgentTrace({ events }: { events: TraceEvent[] }) {
                 >
                   <Badge
                     variant="outline"
-                    className={cn("shrink-0 font-mono text-[10px] uppercase", agentColor[e.agent] ?? "")}
+                    className={cn(
+                      "shrink-0 font-mono text-[10px] uppercase",
+                      agentColor[e.agent] ?? "",
+                    )}
                   >
                     {e.agent}
                   </Badge>
-                  <p className="text-sm leading-snug text-muted-foreground">
-                    {e.summary}
-                  </p>
+                  <p className="text-muted-foreground text-sm leading-snug">{e.summary}</p>
                 </motion.li>
               ))}
             </AnimatePresence>
             {events.length === 0 && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 No events yet. Ask something to see the agents work.
               </p>
             )}

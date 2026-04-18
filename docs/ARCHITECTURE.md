@@ -6,14 +6,14 @@
 
 Sanad is a financial identity platform for Tunisia. Three layers, one data graph, one brand.
 
-| Layer | Name | Audience | Primary surface | Revenue |
-|---|---|---|---|---|
-| 1 | **Sanad Chat** | Individuals (banked + unbanked) | WhatsApp bot (Darija/FR) | Lead generation |
-| 2 | **Daiyn** | SMEs | Web dashboard | €15/Credit Passport, paid by banks |
-| 3 | **Sanad for Banks** | Bank officers / microfinance / BNPL | Web dashboard | €15 per qualified lead |
+| Layer | Name                | Audience                            | Primary surface          | Revenue                            |
+| ----- | ------------------- | ----------------------------------- | ------------------------ | ---------------------------------- |
+| 1     | **Sanad Chat**      | Individuals (banked + unbanked)     | WhatsApp bot (Darija/FR) | Lead generation                    |
+| 2     | **Daiyn**           | SMEs                                | Web dashboard            | €15/Credit Passport, paid by banks |
+| 3     | **Sanad for Banks** | Bank officers / microfinance / BNPL | Web dashboard            | €15 per qualified lead             |
 
-**Tagline:** *"One passport. Every bank. Instant credit."*
-**Bridge line for the pitch:** *"Open banking is the rail. Financial inclusion is the destination. Sanad is the vehicle."*
+**Tagline:** _"One passport. Every bank. Instant credit."_
+**Bridge line for the pitch:** _"Open banking is the rail. Financial inclusion is the destination. Sanad is the vehicle."_
 
 ## Top-level flow (Mermaid)
 
@@ -96,6 +96,7 @@ sequenceDiagram
 ### Conversational state model
 
 Profile slots the agent incrementally fills:
+
 - `identity`: first_name, age_band, city, language
 - `employment`: type (salaried / gig / informal / self-employed / unemployed / student), monthly_income_band, stability_months
 - `banking`: has_bank_account, bank_name?, has_mobile_wallet (D17/Flouci/Ooredoo Money/Paymee)
@@ -106,6 +107,7 @@ Profile slots the agent incrementally fills:
 ### Escalation → Layer 2 handoff
 
 When `sme_signal` triggers:
+
 1. Bot replies with Darija/FR explanation of the Daiyn SME upgrade.
 2. User consents via a WhatsApp flow button.
 3. Backend generates a signed magic-link → WhatsApp message.
@@ -169,17 +171,20 @@ flowchart LR
 ### Node contracts
 
 **a) Formatter** — `inputs: Doc[]` → `output: FormattedCorpus`
+
 - Classifies each doc (invoice / bank_statement / receipt / tax_form / screenshot / other)
 - OCRs images with Claude Vision, parses PDFs with pdf-parse
 - Produces a deduplicated, date-ordered, schema-validated JSON corpus
 - Cites every line item with `source_doc_id`
 
 **b) Orchestrator (god node)** — `inputs: FormattedCorpus + Goal` → `output: Plan[]`
+
 - Reads the corpus, decides what type of credit file to build (operational loan / equipment financing / working capital / factoring)
 - Emits a plan of tasks the Executor will run: reconstruct P&L, compute ratios, assess sector risk, write executive summary, etc.
 - Chooses tool budget (how many LLM calls to spend)
 
 **c) Executor** — `inputs: Plan + FormattedCorpus` → `output: DraftPassport`
+
 - Uses **tool calling**:
   - `computeKPI({metric, window})` — deterministic math over the corpus
   - `queryPeerBenchmarks({sector, size})` — from seeded fixtures
@@ -188,12 +193,14 @@ flowchart LR
 - Outputs a structured `DraftPassport` with every numeric claim tied to `source_doc_id` + `transaction_id`
 
 **d) Reviewer** — `inputs: DraftPassport` → `output: ReviewVerdict`
+
 - Anti-hallucination gate: every numeric claim must cite ≥1 source
 - Consistency check: P&L reconciles to bank flows within tolerance
 - Returns one of: `APPROVED`, `NEEDS_REVISION(reasons[])`
 - If `NEEDS_REVISION`, loops back to Executor (max 1 loop, then escalates to human or finalizes with warnings)
 
 **e) Finalizer** — `inputs: DraftPassport` → `output: SanadPassport`
+
 - Ed25519 signs the passport body with Sanad's private key
 - Renders the printable PDF (browser print-CSS)
 - Writes an **explainability log**: a prose narrative of what each node did, what it found, why the score is what it is
@@ -202,6 +209,7 @@ flowchart LR
 ### HITL (human-in-the-loop) mechanics
 
 Each node emits a LangGraph interrupt before completing. The dashboard subscribes to the checkpoint stream and shows three buttons per node:
+
 - **Approve** — the node's output is accepted, pipeline continues
 - **Refine with AI** — human writes feedback; the node re-runs with the feedback appended to its prompt
 - **Take over manually** — the human's edits become the node's output; the run is marked `hitl=true` on that node
@@ -278,37 +286,43 @@ billing_events { id, bank_id, lead_id, amount_eur, billed_at }
 ## Shared infrastructure
 
 ### Databases
+
 - **Postgres (Neon free tier)** — primary OLTP. All tables in one database for simplicity during hackathon. Drizzle ORM. Migration-as-code.
 - **pgvector extension** — conversational memory (Layer 1), doc chunk embeddings (Layer 2)
 - **Object storage (Cloudflare R2)** — raw uploaded docs, generated PDFs, demo-video backup
 - **Upstash Redis** — session state for WhatsApp conversations, job queue for background tasks
 
 ### Auth
+
 - **Clerk** — SME users, bank officers, admin. Three roles: `sme_owner`, `bank_officer`, `admin`.
 - Layer 1 individuals do NOT authenticate via Clerk — they're identified by WhatsApp phone number, mapped 1:1 to a `users` row.
 
 ### Signing
+
 - **Ed25519** via Node's built-in `crypto.sign`. Private key in env `SANAD_SIGNING_PRIVATE_KEY`. Public key hard-coded in `/verify/[id]` for client-side verification.
 
 ### LangGraph checkpointer
+
 - Persistent Postgres checkpointer. Every node run is checkpointed, enabling:
   - HITL pause/resume
   - Agent time-travel (rewind to a node)
   - Replay for debugging + demos
 
 ### Event bus
+
 - **pg-boss** (Postgres-backed job queue) for background tasks: pipeline triggers, commission events, WhatsApp outbound messaging, email sends.
 
 ### External LLM / services
-| Service | Role | Cost bucket |
-|---|---|---|
-| Anthropic Claude Sonnet 4.6 | Primary reasoning | Executor, Reviewer, Conv |
-| Anthropic Claude Haiku 4.5 | Light classification | Language detect, Formatter, KPI tool |
-| OpenAI (hot fallback) | Failover | Same prompts, switch on error |
-| Groq / Gemini / OpenRouter | BYOK fallbacks | Free-tier hackathon insurance |
-| Meta WhatsApp Cloud API | Layer 1 messaging | Free tier up to 1k conv/mo |
-| Resend | Email (Layer 3 outbound) | Free tier |
-| BCT Open Banking Sandbox | Simulated in-repo fixtures | None |
+
+| Service                     | Role                       | Cost bucket                          |
+| --------------------------- | -------------------------- | ------------------------------------ |
+| Anthropic Claude Sonnet 4.6 | Primary reasoning          | Executor, Reviewer, Conv             |
+| Anthropic Claude Haiku 4.5  | Light classification       | Language detect, Formatter, KPI tool |
+| OpenAI (hot fallback)       | Failover                   | Same prompts, switch on error        |
+| Groq / Gemini / OpenRouter  | BYOK fallbacks             | Free-tier hackathon insurance        |
+| Meta WhatsApp Cloud API     | Layer 1 messaging          | Free tier up to 1k conv/mo           |
+| Resend                      | Email (Layer 3 outbound)   | Free tier                            |
+| BCT Open Banking Sandbox    | Simulated in-repo fixtures | None                                 |
 
 ## Repo layout (target after rebrand)
 
@@ -399,6 +413,7 @@ sanad/
 ## Demo-day narrative (how the 3 layers show up on stage)
 
 The 2-minute video should show all three layers so the story lands:
+
 1. **[0:00-0:30]** — WhatsApp chat with Yassine (individual persona). Profile builds. Bot suggests a BNPL option, then detects SME signal. "You seem to sell regularly. Want to unlock Daiyn?"
 2. **[0:30-1:20]** — Yassine clicks, lands on the SME dashboard pre-filled. Uploads 4 docs (mix of PDF, photo, screenshot). The LangGraph pipeline runs with HITL checkpoints visible. Human clicks "Approve" on node (b), "Refine with AI" on node (c), "Take over" on node (e) to showcase all three HITL modes.
 3. **[1:20-1:50]** — Passport renders, we sign it live, scroll the `/verify` page showing the green checkmark.

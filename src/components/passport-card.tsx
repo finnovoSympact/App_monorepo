@@ -24,13 +24,25 @@ export function PassportCard({ passportId, smeId, score, pd12m, issuedAt, verifi
             {verified ? "Verified" : "Invalid"}
           </Badge>
         </div>
-        <p className="text-xs text-muted-foreground font-mono">{passportId}</p>
+        <p className="text-muted-foreground font-mono text-xs">{passportId}</p>
       </CardHeader>
       <CardContent className="space-y-1 text-sm">
-        <div className="flex justify-between"><span className="text-muted-foreground">SME</span><span>{smeId}</span></div>
-        <div className="flex justify-between"><span className="text-muted-foreground">Score</span><span className="font-semibold">{score}/1000</span></div>
-        <div className="flex justify-between"><span className="text-muted-foreground">PD 12m</span><span>{(pd12m * 100).toFixed(1)}%</span></div>
-        <div className="flex justify-between"><span className="text-muted-foreground">Issued</span><span>{new Date(issuedAt).toLocaleDateString("fr-TN")}</span></div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">SME</span>
+          <span>{smeId}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Score</span>
+          <span className="font-semibold">{score}/1000</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">PD 12m</span>
+          <span>{(pd12m * 100).toFixed(1)}%</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Issued</span>
+          <span>{new Date(issuedAt).toLocaleDateString("fr-TN")}</span>
+        </div>
       </CardContent>
     </Card>
   );

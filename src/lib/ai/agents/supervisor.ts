@@ -31,9 +31,7 @@ export const State = Annotation.Root({
     reducer: (_, next) => next,
     default: () => "",
   }),
-  trace: Annotation<
-    Array<{ agent: string; at: number; summary: string; kind: "in" | "out" }>
-  >({
+  trace: Annotation<Array<{ agent: string; at: number; summary: string; kind: "in" | "out" }>>({
     reducer: (a, b) => [...a, ...b],
     default: () => [],
   }),

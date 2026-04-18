@@ -3,7 +3,7 @@
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  const body = await req.json() as { runId?: string; nodeKey?: string; mode?: string };
+  const body = (await req.json()) as { runId?: string; nodeKey?: string; mode?: string };
   if (!body.runId || !body.nodeKey || !body.mode) {
     return NextResponse.json({ error: "runId, nodeKey, mode required" }, { status: 400 });
   }

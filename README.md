@@ -2,7 +2,7 @@
 
 A multi-agent finance copilot, built for the Finnovo hackathon at INSAT (2026-04-18).
 
-**Core idea.** A supervisor agent dispatches specialist agents (fundamentals, news, risk, critic, composer) that collaborate to answer financial questions. The UI streams their reasoning trace live — the transparency *is* the product.
+**Core idea.** A supervisor agent dispatches specialist agents (fundamentals, news, risk, critic, composer) that collaborate to answer financial questions. The UI streams their reasoning trace live — the transparency _is_ the product.
 
 ## Quick start
 
@@ -17,17 +17,17 @@ Open `/` for the landing, `/playground` for the live agent demo, `/dashboard` fo
 
 ## The stack
 
-| Layer            | Choice                                              |
-| ---------------- | --------------------------------------------------- |
-| Framework        | Next.js 16 (App Router, React 19, Turbopack)        |
-| Language         | TypeScript (`strict: true`)                         |
-| Styling          | Tailwind CSS v4 + shadcn/ui (New York, neutral)     |
-| Agents           | LangGraph supervisor pattern                        |
-| LLMs             | Anthropic (`@ai-sdk/anthropic`, `@langchain/anthropic`) |
-| DB (optional)    | Postgres + Drizzle ORM                              |
-| Charts           | Recharts                                            |
-| Motion           | Framer Motion                                       |
-| Deploy           | Vercel                                              |
+| Layer         | Choice                                                  |
+| ------------- | ------------------------------------------------------- |
+| Framework     | Next.js 16 (App Router, React 19, Turbopack)            |
+| Language      | TypeScript (`strict: true`)                             |
+| Styling       | Tailwind CSS v4 + shadcn/ui (New York, neutral)         |
+| Agents        | LangGraph supervisor pattern                            |
+| LLMs          | Anthropic (`@ai-sdk/anthropic`, `@langchain/anthropic`) |
+| DB (optional) | Postgres + Drizzle ORM                                  |
+| Charts        | Recharts                                                |
+| Motion        | Framer Motion                                           |
+| Deploy        | Vercel                                                  |
 
 ## Layout
 

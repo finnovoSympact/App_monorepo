@@ -10,7 +10,8 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const body = await req.json() as { lead_id?: string; action?: string };
-  if (!body.lead_id || !body.action) return NextResponse.json({ error: "lead_id + action required" }, { status: 400 });
+  const body = (await req.json()) as { lead_id?: string; action?: string };
+  if (!body.lead_id || !body.action)
+    return NextResponse.json({ error: "lead_id + action required" }, { status: 400 });
   return NextResponse.json({ status: "ok" });
 }

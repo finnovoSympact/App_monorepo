@@ -40,6 +40,7 @@ Use these one-liners when you trust the context is loaded. Escalate to the full 
 **When:** once, at hour 0. Run this BEFORE §1.
 
 **Paste:**
+
 ```
 Read docs/ARCHITECTURE.md end to end, then do the following:
 
@@ -96,6 +97,7 @@ Do NOT write real logic yet in any agent/component. This step is purely install 
 **When:** after §0.
 
 **Paste:**
+
 ```
 Rebrand this repo.
 
@@ -134,6 +136,7 @@ At the end: git diff --stat, then run `pnpm -s build`. Paste last 20 lines of bu
 **When:** after §1. Before any server logic.
 
 **Paste:**
+
 ```
 Write src/lib/db/schema.ts with the complete Drizzle schema for all 3 layers + infra. Mirror the table list in docs/ARCHITECTURE.md exactly.
 
@@ -231,6 +234,7 @@ Add src/lib/db/queries.ts with stubs for the 10 most-used queries (comments with
 **When:** after §2. Parallelizable with §4.
 
 **Paste:**
+
 ```
 Create realistic Tunisian fixtures under public/demo/.
 
@@ -282,6 +286,7 @@ No application code in this step. Fixtures only.
 **When:** after §2. The single most important code change.
 
 **Paste:**
+
 ```
 Rewrite src/lib/ai/agents/pipeline.ts + the five node files to implement the Layer 2 5-node pipeline per docs/ARCHITECTURE.md "Layer 2 — Daiyn".
 
@@ -345,6 +350,7 @@ At the end: `pnpm -s tsc --noEmit` must be clean. Do not touch UI yet.
 **When:** after §4.
 
 **Paste:**
+
 ```
 Build the SME-facing Layer 2 UI.
 
@@ -396,6 +402,7 @@ Constraints:
 **When:** after §4. Parallelizable with §5.
 
 **Paste:**
+
 ```
 Implement the Sanad Passport artifact layer.
 
@@ -431,6 +438,7 @@ Add a "Sanad Passport" result widget to /dashboard/pipeline/[runId] that appears
 **When:** after §2 and §3. Parallelizable with §5/§6.
 
 **Paste:**
+
 ```
 Build the demo-day WhatsApp simulator at /chat.
 
@@ -465,6 +473,7 @@ Do NOT implement the real WhatsApp webhook in this step.
 **When:** after §7.
 
 **Paste:**
+
 ```
 Implement the real Layer 1 conversational agent and supporting services.
 
@@ -504,6 +513,7 @@ Run an end-to-end sanity pass on yassine.json: start a fresh conversation, feed 
 **When:** after §8 (needs Layer 1 + 2 data present).
 
 **Paste:**
+
 ```
 Implement Layer 3 — Sanad for Banks — per docs/ARCHITECTURE.md.
 
@@ -544,6 +554,7 @@ Add a small commission tracker strip at the bottom of /bank: "Commission ce mois
 **When:** after §5, §7, §9 all exist (we need real URLs for the CTAs).
 
 **Paste:**
+
 ```
 Rewrite src/app/page.tsx as the public landing. Goal: a Tunisian judge can read it in 8 seconds and understand what Sanad is.
 
@@ -578,6 +589,7 @@ Constraints:
 **When:** hour 14-16.
 
 **Paste:**
+
 ```
 Generate an 8-slide Marp deck at /deck/sanad.md per the Finnovo spec.
 
@@ -606,6 +618,7 @@ Append an ## Export section with:
 **When:** hour 16-18.
 
 **Paste:**
+
 ```
 Produce /deck/demo-video.md — complete shot list and voiceover script for a 2-minute recorded video of Sanad. I record with OBS (screen+mic) on my laptop, then edit in CapCut. Hard cap 120s.
 
@@ -659,6 +672,7 @@ Do NOT produce the MP4 itself — script + setup doc + SRT only.
 **When:** hour 19-20. Final sweep.
 
 **Paste:**
+
 ```
 Act as senior eng + senior VC reviewing Sanad the night before the Finnovo pitch. Read the full repo + docs/ARCHITECTURE.md + /deck/sanad.md + /deck/demo-video.md.
 
@@ -690,6 +704,7 @@ Cap total report at 700 words.
 **When:** 07:00 Sunday. 1h before 08:00 deadline.
 
 **Paste:**
+
 ```
 Pre-flight, one-line status per item:
 
@@ -719,6 +734,7 @@ If ANY check fails, STOP and report. Do not attempt fixes at this hour.
 **When:** 07:00 Sunday.
 
 **Paste:** (not a Claude prompt — a human checklist; keep this section as the hand-off.)
+
 ```
 HUMAN CHECKLIST — not for Claude Code.
 
@@ -742,26 +758,31 @@ HUMAN CHECKLIST — not for Claude Code.
 ## Appendix — single-purpose utility prompts (reuse during the 24h)
 
 ### New page
+
 ```
 Create /app/<path>/page.tsx that does <one sentence>. Use shadcn/ui + Tailwind. ≤150 LoC. Accessible. Match existing palette (teal primary, amber accent).
 ```
 
 ### Add a new tool to the Executor
+
 ```
 Add a tool `<toolName>` to src/lib/ai/agents/executor.ts. Signature: `<zod schema>`. Behavior: <one sentence>. Bind it to the Executor model. Return type JSON-serializable.
 ```
 
 ### Fix a build error
+
 ```
 `pnpm build` fails with: <paste error>. Find the root cause — do not patch symptoms. Show me the fix as a diff before applying.
 ```
 
 ### Tighten copy
+
 ```
 Rewrite <copy pasted verbatim> for a pitch audience. Constraints: under <N> words, active voice, no hedging, French. Produce 3 variants.
 ```
 
 ### Extend matching engine
+
 ```
 Add a new criterion <name> to src/lib/matching/engine.ts. Semantics: <one sentence>. Weight: <1-10>. Include a unit test with 2 positive + 2 negative cases.
 ```

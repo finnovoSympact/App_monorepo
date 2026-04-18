@@ -51,7 +51,7 @@ Run from the project root.
 - Named exports preferred; default exports only for `page.tsx` / `layout.tsx`.
 - Path alias `@/*` resolves to `src/*`.
 - Tailwind classes over inline styles.
-- Comments explain *why*, not *what*.
+- Comments explain _why_, not _what_.
 - Copy shadcn components by running `pnpm dlx shadcn@latest add <name>` — do not hand-author them.
 
 ## Subagents (in `.claude/agents/`)

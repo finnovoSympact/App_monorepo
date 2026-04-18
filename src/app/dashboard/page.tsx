@@ -25,19 +25,19 @@ const kpis = [
 
 export default function DashboardPage() {
   return (
-    <main className="mx-auto max-w-6xl px-6 pb-20 pt-12">
+    <main className="mx-auto max-w-6xl px-6 pt-12 pb-20">
       <h1 className="mb-1 text-2xl font-semibold tracking-tight">Dashboard</h1>
-      <p className="mb-8 text-sm text-muted-foreground">
+      <p className="text-muted-foreground mb-8 text-sm">
         A placeholder finance dashboard. Wire real queries to{" "}
-        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">src/lib/db</code> tomorrow.
+        <code className="bg-muted rounded px-1.5 py-0.5 text-xs">src/lib/db</code> tomorrow.
       </p>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {kpis.map((k) => (
           <Card key={k.label} className="border-border/60">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm text-muted-foreground">{k.label}</CardTitle>
-              <k.icon className="size-4 text-muted-foreground" />
+              <CardTitle className="text-muted-foreground text-sm">{k.label}</CardTitle>
+              <k.icon className="text-muted-foreground size-4" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-semibold tracking-tight">
@@ -56,17 +56,15 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle className="text-base">Agent insights</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
+          <CardContent className="text-muted-foreground space-y-3 text-sm">
             <p>
-              Your grocery spend is up <span className="font-semibold text-foreground">18%</span>{" "}
-              vs last quarter. Agent suggests a commitment contract.
+              Your grocery spend is up <span className="text-foreground font-semibold">18%</span> vs
+              last quarter. Agent suggests a commitment contract.
             </p>
             <p>
               Based on your new FX-account eligibility, reallocating{" "}
-              <span className="font-semibold text-foreground">
-                {formatCompact(5000)} TND
-              </span>{" "}
-              to EUR could hedge 7% downside.
+              <span className="text-foreground font-semibold">{formatCompact(5000)} TND</span> to
+              EUR could hedge 7% downside.
             </p>
             <p className="text-xs">Run the playground to explore more.</p>
           </CardContent>

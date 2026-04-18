@@ -38,9 +38,7 @@ export default function HomePage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card className="border-border/60">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-muted-foreground">
-                Agents deployed
-              </CardTitle>
+              <CardTitle className="text-muted-foreground text-sm">Agents deployed</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-semibold tracking-tight">
@@ -50,9 +48,7 @@ export default function HomePage() {
           </Card>
           <Card className="border-border/60">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-muted-foreground">
-                Avg response
-              </CardTitle>
+              <CardTitle className="text-muted-foreground text-sm">Avg response</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-semibold tracking-tight">
@@ -62,9 +58,7 @@ export default function HomePage() {
           </Card>
           <Card className="border-border/60">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-muted-foreground">
-                Queries served
-              </CardTitle>
+              <CardTitle className="text-muted-foreground text-sm">Queries served</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-semibold tracking-tight">
@@ -74,9 +68,7 @@ export default function HomePage() {
           </Card>
           <Card className="border-border/60">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-muted-foreground">
-                Hallucinations caught
-              </CardTitle>
+              <CardTitle className="text-muted-foreground text-sm">Hallucinations caught</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-semibold tracking-tight text-emerald-500">
@@ -90,7 +82,7 @@ export default function HomePage() {
           {features.map((f) => (
             <Card key={f.title} className="border-border/60">
               <CardHeader>
-                <div className="mb-2 flex size-10 items-center justify-center rounded-lg bg-brand-500/10 text-brand-600">
+                <div className="bg-brand-500/10 text-brand-600 mb-2 flex size-10 items-center justify-center rounded-lg">
                   <f.icon className="size-5" />
                 </div>
                 <CardTitle className="text-lg">{f.title}</CardTitle>

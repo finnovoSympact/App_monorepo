@@ -99,7 +99,7 @@ export default function PlaygroundPage() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-6 pb-20 pt-12">
+    <main className="mx-auto max-w-6xl px-6 pt-12 pb-20">
       <div className="mb-1 flex items-center gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">Playground</h1>
         {offline && (
@@ -109,7 +109,7 @@ export default function PlaygroundPage() {
           </Badge>
         )}
       </div>
-      <p className="mb-8 text-sm text-muted-foreground">
+      <p className="text-muted-foreground mb-8 text-sm">
         Ask the agent crew anything. Watch the trace on the right as they work.
         {offline && " Append ?offline=0 to the URL to switch back to live agents."}
       </p>
@@ -141,11 +141,9 @@ export default function PlaygroundPage() {
             </CardHeader>
             <CardContent>
               {answer ? (
-                <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                  {answer}
-                </p>
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">{answer}</p>
               ) : (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   The final, critic-approved answer will appear here.
                 </p>
               )}

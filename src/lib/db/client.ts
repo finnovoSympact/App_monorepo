@@ -12,7 +12,10 @@ const globalForDb = globalThis as unknown as {
 const connectionString = process.env.DATABASE_URL;
 
 export const db = connectionString
-  ? drizzle(globalForDb.__pgClient ?? (globalForDb.__pgClient = postgres(connectionString, { prepare: false })))
+  ? drizzle(
+      globalForDb.__pgClient ??
+        (globalForDb.__pgClient = postgres(connectionString, { prepare: false })),
+    )
   : null;
 
 /**

@@ -3,10 +3,16 @@
 const LIVE = process.env.WHATSAPP_LIVE === "1";
 
 export async function sendText(to: string, text: string): Promise<void> {
-  if (!LIVE) { console.log(`[WhatsApp stub] → ${to}: ${text}`); return; }
+  if (!LIVE) {
+    console.log(`[WhatsApp stub] → ${to}: ${text}`);
+    return;
+  }
   // TODO: axios POST to Meta Cloud API
 }
 
 export async function sendButtons(to: string, body: string, buttons: string[]): Promise<void> {
-  if (!LIVE) { console.log(`[WhatsApp stub] → ${to} buttons:`, buttons); return; }
+  if (!LIVE) {
+    console.log(`[WhatsApp stub] → ${to} buttons:`, buttons);
+    return;
+  }
 }

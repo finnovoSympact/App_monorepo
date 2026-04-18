@@ -25,11 +25,7 @@
       "WebFetch",
       "WebSearch"
     ],
-    "deny": [
-      "Bash(rm -rf /**)",
-      "Bash(sudo:*)",
-      "Bash(:(){ :|:&};:)"
-    ]
+    "deny": ["Bash(rm -rf /**)", "Bash(sudo:*)", "Bash(:(){ :|:&};:)"]
   },
   "env": {
     "NODE_ENV": "development"
