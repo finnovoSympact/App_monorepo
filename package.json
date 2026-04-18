@@ -23,7 +23,6 @@
     "@langchain/core": "^1.1.40",
     "@langchain/langgraph": "^1.2.9",
     "ai": "^6.0.168",
-    "better-sqlite3": "^12.9.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -42,6 +41,14 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
     "zod": "^4.3.6"
+  },
+  "pnpm": {
+    "allowedDeprecatedVersions": {},
+    "allowedBuildScripts": [
+      "better-sqlite3",
+      "esbuild",
+      "@clerk/shared"
+    ]
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
