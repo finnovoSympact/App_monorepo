@@ -1,12 +1,12 @@
 @AGENTS.md
 
-# Finnovo — Claude Code project brief
+# Sanad — Claude Code project brief
 
 > This file is loaded automatically by Claude Code. Keep it tight. Any setup that is not stack- or project-specific lives in `.claude/` instead. The `@AGENTS.md` reference above imports the Next.js 16 agent rules.
 
 ## What we're building
 
-A **multi-agent finance copilot** for the Finnovo hackathon at INSAT (2026-04-18). The chosen idea is locked in `IDEAS.md` — read it before planning any feature. The core demo wow is a **visible live agent trace** that shows a supervisor + specialists + critic chain producing a grounded answer.
+A **multi-agent credit passport platform** for the Sanad hackathon at INSAT (2026-04-18). The chosen idea is locked in `IDEAS.md` — read it before planning any feature. The core demo wow is a **visible live agent trace** that shows a supervisor + specialists + critic chain producing a grounded answer.
 
 ## Stack
 

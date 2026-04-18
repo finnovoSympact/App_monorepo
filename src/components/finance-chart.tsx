@@ -41,8 +41,8 @@ export function FinanceChart({
           <AreaChart data={data}>
             <defs>
               <linearGradient id="brand-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--brand-500)" stopOpacity={0.5} />
-                <stop offset="100%" stopColor="var(--brand-500)" stopOpacity={0} />
+                <stop offset="0%" stopColor="var(--linear-accent)" stopOpacity={0.5} />
+                <stop offset="100%" stopColor="var(--linear-accent)" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -72,7 +72,7 @@ export function FinanceChart({
             <Area
               type="monotone"
               dataKey={valueKey}
-              stroke="var(--brand-500)"
+              stroke="var(--linear-accent)"
               strokeWidth={2}
               fill="url(#brand-fill)"
             />

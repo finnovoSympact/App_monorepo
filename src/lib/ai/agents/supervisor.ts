@@ -1,6 +1,7 @@
 import { StateGraph, Annotation, START, END } from "@langchain/langgraph";
-import { ChatAnthropic } from "@langchain/anthropic";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+import { getLangchainModel } from "@/lib/ai/client";
+import type { ChatOpenAI } from "@langchain/openai";
 
 /**
  * Multi-agent supervisor pattern.
@@ -44,16 +45,16 @@ type AppState = typeof State.State;
  * when the API key isn't injected. Always call `getSmart()` / `getStrong()` from
  * inside a request handler.
  */
-let _smart: ChatAnthropic | null = null;
-let _strong: ChatAnthropic | null = null;
+let _smart: ChatOpenAI | null = null;
+let _strong: ChatOpenAI | null = null;
 
-function getSmart(): ChatAnthropic {
-  if (!_smart) _smart = new ChatAnthropic({ model: "claude-sonnet-4-6", temperature: 0.2 });
+function getSmart(): ChatOpenAI {
+  if (!_smart) _smart = getLangchainModel("smart");
   return _smart;
 }
 
-function getStrong(): ChatAnthropic {
-  if (!_strong) _strong = new ChatAnthropic({ model: "claude-opus-4-6", temperature: 0.1 });
+function getStrong(): ChatOpenAI {
+  if (!_strong) _strong = getLangchainModel("strong");
   return _strong;
 }
 

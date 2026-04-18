@@ -1,23 +1,26 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, IBM_Plex_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { SiteNav } from "@/components/site-nav";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Inter Variable — Linear's primary typeface
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const ibmPlexMono = IBM_Plex_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
+  weight: ["300", "400", "500"],
 });
 
 export const metadata: Metadata = {
-  title: "Finnovo — finance that thinks",
+  title: "Sanad — finance that thinks",
   description:
-    "A multi-agent finance copilot built for Tunisia. Watch specialized AI agents collaborate to answer financial questions in real time.",
+    "A multi-agent credit passport platform built for Tunisia. Watch specialized AI agents collaborate to answer financial questions in real time.",
 };
 
 export default function RootLayout({
@@ -28,12 +31,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${ibmPlexMono.variable} dark h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="bg-background text-foreground flex min-h-full flex-col">
         <SiteNav />
-        <div className="flex-1">{children}</div>
+        <div id="main-content" className="flex-1">{children}</div>
         <Toaster position="top-right" richColors />
       </body>
     </html>

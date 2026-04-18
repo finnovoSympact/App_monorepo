@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { AgentTrace, type TraceEvent } from "@/components/agent-trace";
 import { playCannedTrace } from "@/lib/ai/canned";
+import { ChapterMark, Hairline } from "@/components/sanad/type";
 
 /**
  * Agent playground — the live demo page.
@@ -27,7 +28,7 @@ export default function PlaygroundPage() {
   // Allow ?offline=1 in the URL to force canned-trace mode (demo-day insurance).
   React.useEffect(() => {
     const q = new URLSearchParams(window.location.search);
-    if (q.get("offline") === "1") setOffline(true);
+    if (q.get("offline") === "1") setTimeout(() => setOffline(true), 0);
   }, []);
 
   async function runCanned() {
@@ -100,25 +101,29 @@ export default function PlaygroundPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-6 pt-12 pb-20">
+      <ChapterMark num="سند" label="Agent Playground" tone="gold" className="mb-6" />
       <div className="mb-1 flex items-center gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">Playground</h1>
+        <h1 className="font-instrument text-[clamp(2rem,4vw,3.5rem)] leading-tight tracking-tight">
+          Live agent crew
+        </h1>
         {offline && (
           <Badge variant="outline" className="gap-1 text-amber-700">
             <WifiOff className="size-3" />
-            Offline demo mode
+            Offline
           </Badge>
         )}
       </div>
-      <p className="text-muted-foreground mb-8 text-sm">
-        Ask the agent crew anything. Watch the trace on the right as they work.
-        {offline && " Append ?offline=0 to the URL to switch back to live agents."}
+      <p className="font-mono text-[11px] tracking-widest uppercase mt-2 mb-8 text-muted-foreground">
+        Ask anything · watch the trace · see the agents collaborate
       </p>
+
+      <Hairline className="mb-8" />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Your question</CardTitle>
+              <CardTitle className="text-base font-instrument">Your question</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <Textarea
@@ -137,13 +142,13 @@ export default function PlaygroundPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Composed answer</CardTitle>
+              <CardTitle className="text-base font-instrument">Composed answer</CardTitle>
             </CardHeader>
             <CardContent>
               {answer ? (
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">{answer}</p>
               ) : (
-                <p className="text-muted-foreground text-sm">
+                <p className="text-sm italic text-muted-foreground">
                   The final, critic-approved answer will appear here.
                 </p>
               )}

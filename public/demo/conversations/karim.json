@@ -1,0 +1,21 @@
+{
+  "persona": { "name": "Karim", "age": 31, "city": "Paris (diaspora)", "lang_mix": "fr" },
+  "turns": [
+    { "role": "user", "text": "Bonjour, je suis Tunisien en France et je veux financer un appartement a Tunis", "lang": "fr" },
+    { "role": "assistant", "text": "Bonjour Karim ! Excellent projet. Vous etes salarie en France ? Et vous avez deja un compte bancaire en Tunisie ?", "expected_profile_delta": { "identity": { "city": "Paris", "residency": "diaspora" } } },
+    { "role": "user", "text": "Oui, CDI depuis 3 ans chez une boite tech a Paris. J'ai un compte STB que j'avais avant de partir.", "lang": "fr" },
+    { "role": "assistant", "text": "Parfait — CDI 3 ans et compte STB actif, c'est une base solide. Votre salaire mensuel en France, approximativement ?", "expected_profile_delta": { "employment": { "type": "salaried", "stability_months": 36, "country": "FR" }, "banking": { "has_bank_account": true, "bank_name": "STB" } } },
+    { "role": "user", "text": "2800 euros net. Je mets de cote 600 euros/mois depuis 2 ans pour ce projet.", "lang": "fr" },
+    { "role": "assistant", "text": "2800 EUR net + 600 EUR/mois d'epargne sur 24 mois = environ 14 400 EUR d'apport potentiel. Pour un appartement a Tunis, les banques tunisiennes financent les MRE. BIAT et Attijari ont des produits dedies. Quel budget envisagez-vous ?", "expected_profile_delta": { "employment": { "monthly_income_band": "2500-3000", "savings_monthly": 600 }, "goals": { "long_term": "real_estate_tunis" } } },
+    { "role": "user", "text": "Entre 120 000 et 150 000 DT. C'est realiste ?", "lang": "fr" },
+    { "role": "assistant", "text": "Tout a fait realiste. Votre profil diaspora avec CDI est tres apprecie. Je peux generer un dossier Sanad Passport qui met en valeur votre stabilite financiere — les banques le lisent en 30 secondes. Ca vous interesse ?", "expected_profile_delta": { "goals": { "amount_tnd": 135000 } } }
+  ],
+  "terminal_state": {
+    "identity": { "name": "Karim", "age_band": "30-35", "city": "Paris", "residency": "diaspora" },
+    "employment": { "type": "salaried", "stability_months": 36 },
+    "banking": { "has_bank_account": true, "bank_name": "STB" },
+    "goals": { "long_term": "real_estate_tunis", "amount_tnd": 135000 },
+    "sme_signal_count": 0,
+    "escalated": false
+  }
+}

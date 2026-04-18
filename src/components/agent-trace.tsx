@@ -15,12 +15,12 @@ export type TraceEvent = {
 };
 
 const agentColor: Record<string, string> = {
-  supervisor: "bg-brand-500/15 text-brand-600",
-  fundamentals: "bg-blue-500/15 text-blue-600",
-  news: "bg-amber-500/15 text-amber-700",
-  risk: "bg-red-500/15 text-red-600",
-  critic: "bg-purple-500/15 text-purple-700",
-  composer: "bg-emerald-500/15 text-emerald-700",
+  supervisor: "bg-indigo-500/15 text-indigo-400",
+  fundamentals: "bg-blue-500/15 text-blue-400",
+  news: "bg-amber-500/15 text-amber-400",
+  risk: "bg-red-500/15 text-red-400",
+  critic: "bg-purple-500/15 text-purple-400",
+  composer: "bg-emerald-500/15 text-emerald-400",
 };
 
 /**
@@ -41,7 +41,7 @@ export function AgentTrace({ events }: { events: TraceEvent[] }) {
       </CardHeader>
       <CardContent className="pt-0">
         <ScrollArea className="h-[420px] pr-3">
-          <ol className="space-y-2">
+          <ol aria-live="polite" aria-atomic="false" className="space-y-2">
             <AnimatePresence initial={false}>
               {events.map((e, i) => (
                 <motion.li

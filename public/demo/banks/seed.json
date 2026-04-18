@@ -1,0 +1,28 @@
+{
+  "banks": [
+    {
+      "id": "biat-pilot",
+      "name": "BIAT Pilot",
+      "criteria": {
+        "subjectKinds": ["sme"],
+        "ticketRange": { "min": 5000, "max": 50000, "currency": "EUR" },
+        "maxPD": 0.06,
+        "sectors": ["food", "retail", "services"],
+        "regions": ["tunis", "sousse", "sfax"],
+        "minCreditScore": 65
+      }
+    },
+    {
+      "id": "microfinance-tn",
+      "name": "Microfinance TN",
+      "criteria": {
+        "subjectKinds": ["individual", "sme"],
+        "ticketRange": { "min": 200, "max": 5000, "currency": "EUR" },
+        "maxPD": 0.15,
+        "sectors": ["all"],
+        "regions": ["all"],
+        "minCreditScore": 40
+      }
+    }
+  ]
+}

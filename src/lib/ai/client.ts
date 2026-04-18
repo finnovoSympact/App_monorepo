@@ -1,32 +1,52 @@
-import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOpenAI } from "@ai-sdk/openai";
+import { ChatOpenAI } from "@langchain/openai";
 
 /**
- * Central AI client factory. All model calls in the app should go through here
- * so we can swap providers, add observability, or inject guardrails in one place.
+ * Central AI client factory — powered by Groq (OpenAI-compatible).
  *
  * Env vars:
- *   ANTHROPIC_API_KEY — required for Claude
- *   OPENAI_API_KEY    — optional, used as fallback
+ *   GROQ_API_KEY      — required
+ *   OPENAI_BASE_URL   — defaults to https://api.groq.com/openai/v1
  */
 
-const anthropic = createAnthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+function groqBaseURL(): string {
+  return process.env.OPENAI_BASE_URL ?? "https://api.groq.com/openai/v1";
+}
 
-const openai = createOpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+// AI SDK client (for streaming routes / generateText)
+const groq = createOpenAI({
+  baseURL: groqBaseURL(),
+  apiKey: process.env.GROQ_API_KEY ?? "",
 });
 
 export const models = {
-  /** Fast, cheap — use for classifiers, routers, cheap agents. */
-  fast: anthropic("claude-haiku-4-5-20251001"),
-  /** Smart default — use for most agent steps. */
-  smart: anthropic("claude-sonnet-4-6"),
-  /** Maximum capability — reserve for critic/reviewer loops and tough tasks. */
-  strong: anthropic("claude-opus-4-6"),
-  /** Fallback if Anthropic is down. */
-  fallback: openai("gpt-4.1-mini"),
+  /** Fast, cheap — classifiers, routers, cheap agents. */
+  fast: groq("llama-3.1-8b-instant"),
+  /** Smart default — most agent steps. */
+  smart: groq("llama-3.3-70b-versatile"),
+  /** Maximum capability — critic/reviewer loops. */
+  strong: groq("llama-3.3-70b-versatile"),
+  /** Lightweight fallback. */
+  fallback: groq("gemma2-9b-it"),
 } as const;
 
 export type ModelKey = keyof typeof models;
+
+/**
+ * LangChain model factory for agents that use @langchain/core messages.
+ * Must be called inside a request handler (not at module load time).
+ */
+export function getLangchainModel(
+  tier: "fast" | "smart" | "strong" = "smart",
+): ChatOpenAI {
+  const modelName =
+    tier === "fast" ? "llama-3.1-8b-instant" : "llama-3.3-70b-versatile";
+  return new ChatOpenAI({
+    modelName,
+    temperature: tier === "fast" ? 0.1 : 0.2,
+    configuration: {
+      baseURL: groqBaseURL(),
+      apiKey: process.env.GROQ_API_KEY ?? "",
+    },
+  });
+}

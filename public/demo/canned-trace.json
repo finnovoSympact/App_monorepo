@@ -1,54 +1,48 @@
 {
-  "prompt": "Should I buy Banque de Tunisie (BT) stock given the new foreign-currency rules?",
+  "runId": "demo-run-001",
+  "smeId": "cafe-el-wafa",
+  "goal": "Working capital loan of 30,000 TND",
   "steps": [
-    {
-      "delayMs": 400,
-      "event": {
-        "agent": "supervisor",
-        "summary": "Plan: fundamentals → news → risk",
-        "kind": "out"
-      }
-    },
-    {
-      "delayMs": 900,
-      "event": {
-        "agent": "fundamentals",
-        "summary": "BT P/E 7.4, ROE 12.1%, div yield 5.2%. Balance sheet: T1 ratio 11.8%. Stable.",
-        "kind": "out"
-      }
-    },
-    {
-      "delayMs": 700,
-      "event": {
-        "agent": "news",
-        "summary": "Dec 2025: residents now allowed FX accounts → tailwind for BT retail FX fee income.",
-        "kind": "out"
-      }
-    },
-    {
-      "delayMs": 800,
-      "event": {
-        "agent": "risk",
-        "summary": "Beta 0.62 vs TUNINDEX. 30-day VaR at 95%: −4.1%. Correlated with BNA and BIAT.",
-        "kind": "out"
-      }
-    },
-    {
-      "delayMs": 900,
-      "event": {
-        "agent": "critic",
-        "summary": "All three findings are grounded. No speculative claim detected. Approved.",
-        "kind": "out"
-      }
-    },
-    {
-      "delayMs": 1100,
-      "event": {
-        "agent": "composer",
-        "summary": "Composed final answer with citations.",
-        "kind": "out"
-      }
-    }
+    { "delayMs": 600, "nodeKey": "a_formatter", "event": { "agent": "a_formatter", "summary": "Classified 6 docs: 4 invoices, 1 bank statement, 1 open-banking feed. 47 line items extracted. All sources cited.", "kind": "out", "status": "completed" } },
+    { "delayMs": 400, "nodeKey": "a_formatter", "event": { "agent": "a_formatter", "summary": "HITL checkpoint — awaiting approval", "kind": "hitl", "status": "waiting" } },
+    { "delayMs": 800, "nodeKey": "b_orchestrator", "event": { "agent": "b_orchestrator", "summary": "Plan: [1] Reconstruct P&L (12mo), [2] Compute current ratio + debt-to-equity, [3] Assess sector risk (F&B Tunis), [4] Write executive summary.", "kind": "out", "status": "completed" } },
+    { "delayMs": 1200, "nodeKey": "c_executor", "event": { "agent": "c_executor", "summary": "computeKPI(gross_margin, 12mo) → 34.2%. queryPeerBenchmarks(food, micro) → sector avg 31.4%. flagRisk(cash_concentration, medium). renderPassportSection(executive_summary) ✓", "kind": "out", "status": "completed" } },
+    { "delayMs": 900, "nodeKey": "d_reviewer", "event": { "agent": "d_reviewer", "summary": "NEEDS_REVISION: Revenue figure on 2025-11-01 invoice not reconciled with bank flow. Sending back to executor.", "kind": "out", "status": "revised" } },
+    { "delayMs": 1100, "nodeKey": "c_executor", "event": { "agent": "c_executor", "summary": "Revision loop: reconciled Nov invoice — rounding difference 12 TND, within tolerance. Passport sections updated.", "kind": "out", "status": "completed" } },
+    { "delayMs": 700, "nodeKey": "d_reviewer", "event": { "agent": "d_reviewer", "summary": "APPROVED. All 47 claims verified against source docs. P&L reconciles to ±0.1% of bank flows.", "kind": "out", "status": "completed" } },
+    { "delayMs": 800, "nodeKey": "e_finalizer", "event": { "agent": "e_finalizer", "summary": "Sanad Passport signed (Ed25519). Credit score: 72/100. XAI log written. Passport ID: pp_cafe_wafa_2026.", "kind": "out", "status": "completed" } }
   ],
-  "final": "On balance, BT looks fundamentally sound [fundamentals] and the new FX-account rule is a genuine tailwind for retail FX revenue [news]. Downside risk is moderate and typical for Tunisian banks [risk]. This is educational — not personalized advice. A reasonable next step is to model a small position (e.g. 2–5% of portfolio) and compare against BIAT or ATB before committing."
+  "passport": {
+    "id": "pp_cafe_wafa_2026",
+    "smeId": "cafe-el-wafa",
+    "companyName": "Café El Wafa SARL",
+    "city": "Tunis — La Marsa",
+    "sector": "Food & Beverage",
+    "issuedAt": "2026-04-18T10:00:00Z",
+    "expiresAt": "2026-07-17T10:00:00Z",
+    "creditScore": 72,
+    "scoreLabel": "Good",
+    "scoreColor": "green",
+    "goal": "Working capital loan — 30,000 TND",
+    "summary": "Café El Wafa is a profitable food & beverage micro-enterprise with 34.2% gross margin, above the 31.4% sector average. Cash flow is regular and predictable. Main risk: revenue concentration (top 3 months = 61% of annual). Recommended product: BFR loan 30k TND, 18–24 months.",
+    "kpis": [
+      { "label": "Gross Margin", "value": "34.2%", "benchmark": "31.4% sector avg", "status": "above" },
+      { "label": "Current Ratio", "value": "1.8x", "benchmark": "≥1.5x", "status": "ok" },
+      { "label": "Debt / Equity", "value": "0.4x", "benchmark": "≤1.0x", "status": "ok" },
+      { "label": "Cash Runway", "value": "4.2 mo", "benchmark": "≥3 mo", "status": "ok" }
+    ],
+    "risks": [
+      { "kind": "cash_concentration", "severity": "medium", "evidence": "Top 3 months = 61% of annual revenue" },
+      { "kind": "no_formal_accounting", "severity": "low", "evidence": "Records reconstructed from bank flows + invoices" }
+    ],
+    "sourceDocuments": [
+      { "id": "doc1", "kind": "invoice", "label": "Inv-2025-11 — Fournisseur Epicerie", "amount": 1840, "currency": "TND" },
+      { "id": "doc2", "kind": "invoice", "label": "Inv-2025-12 — Fournisseur Café", "amount": 2200, "currency": "TND" },
+      { "id": "doc3", "kind": "bank_statement", "label": "Relevé BNA Déc 2025", "amount": null, "currency": "TND" },
+      { "id": "doc4", "kind": "open_banking", "label": "D17 feed Oct–Dec 2025", "amount": null, "currency": "TND" }
+    ],
+    "xaiLog": "The formatter classified 6 documents in 0.8s. The orchestrator chose a working-capital analysis plan based on the goal. The executor computed all KPIs deterministically from line items — no LLM inference for numeric values. The reviewer caught a reconciliation gap in Nov invoice and triggered a revision loop. After reconciliation the gap was 12 TND (0.07%) — within tolerance. Final score 72/100 weights: cash flow regularity (30%), margin vs benchmark (25%), debt level (20%), doc completeness (15%), sector risk (10%).",
+    "signature": "demo_signature_ed25519_hex",
+    "verifyUrl": "/verify/pp_cafe_wafa_2026"
+  }
 }

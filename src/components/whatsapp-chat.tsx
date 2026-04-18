@@ -27,7 +27,7 @@ export function WhatsappChat({ messages, onSend, isTyping }: Props) {
     <div className="border-border/60 flex h-full flex-col overflow-hidden rounded-xl border bg-[#0a1929]">
       {/* Header */}
       <div className="flex items-center gap-3 bg-[#1a2f45] px-4 py-3">
-        <div className="bg-brand-500 flex size-8 items-center justify-center rounded-full text-xs font-bold text-white">
+        <div className="bg-[var(--linear-brand)] flex size-8 items-center justify-center rounded-full text-xs font-bold text-white">
           S
         </div>
         <div>
@@ -85,7 +85,7 @@ export function WhatsappChat({ messages, onSend, isTyping }: Props) {
               setInput("");
             }
           }}
-          className="bg-brand-500 hover:bg-brand-600 rounded-full"
+          className="bg-[var(--linear-brand)] hover:bg-[var(--linear-accent)] rounded-full"
         >
           <Send className="size-4" />
         </Button>

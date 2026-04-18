@@ -14,7 +14,10 @@
       "Bash(pnpm tsc:*)",
       "Bash(pnpm format:*)",
       "Bash(pnpm check:*)",
-      "Bash(npx prettier:*)"
+      "Bash(npx prettier:*)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm remove:*)"
     ]
   }
 }

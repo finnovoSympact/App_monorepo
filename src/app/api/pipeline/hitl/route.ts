@@ -1,12 +1,39 @@
-// POST { runId, nodeKey, mode, feedback?, override? } → resumes pipeline after HITL checkpoint
-// TODO §4: resume LangGraph checkpointer
-import { NextResponse } from "next/server";
+// POST { runId, nodeKey, mode, feedback?, override? } → acknowledges HITL action
+import { NextRequest } from "next/server";
 
-export async function POST(req: Request) {
-  const body = (await req.json()) as { runId?: string; nodeKey?: string; mode?: string };
-  if (!body.runId || !body.nodeKey || !body.mode) {
-    return NextResponse.json({ error: "runId, nodeKey, mode required" }, { status: 400 });
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+export async function POST(req: NextRequest) {
+  const body = (await req.json()) as {
+    runId?: string;
+    nodeKey?: string;
+    mode?: string;
+    feedback?: string;
+    override?: unknown;
+  };
+  if (!body.runId || !body.nodeKey) {
+    return new Response(JSON.stringify({ error: "runId and nodeKey required" }), {
+      status: 400,
+      headers: { "content-type": "application/json" },
+    });
   }
-  // TODO §4: resume pipeline
-  return NextResponse.json({ status: "resumed" });
+
+  const modeLabel =
+    body.mode === "approve"
+      ? "approved"
+      : body.mode === "refine"
+        ? "queued for refinement"
+        : "taken over";
+
+  return new Response(
+    JSON.stringify({
+      ok: true,
+      runId: body.runId,
+      nodeKey: body.nodeKey,
+      mode: body.mode ?? "approve",
+      message: `Node ${body.nodeKey} ${modeLabel}`,
+    }),
+    { headers: { "content-type": "application/json" } },
+  );
 }

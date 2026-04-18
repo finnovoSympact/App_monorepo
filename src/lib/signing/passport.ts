@@ -32,3 +32,41 @@ export function verify(body: Record<string, unknown>, signature: string): boolea
     Buffer.from(signature, "hex"),
   );
 }
+
+export interface PassportBody {
+  id: string;
+  smeId?: string;
+  subjectUserId?: string;
+  companyName?: string;
+  sector?: string;
+  city?: string;
+  issuedAt: string;
+  expiresAt: string;
+  creditScore: number;
+  scoreLabel: string;
+  goal: string;
+  summary: string;
+  kpis: Array<{ label: string; value: string; benchmark: string; status: string }>;
+  risks: Array<{ kind: string; severity: string; evidence: string }>;
+  sourceDocuments: Array<{ id: string; kind: string; label: string }>;
+  xaiLog: string;
+}
+
+export function issuePassport(
+  body: Omit<PassportBody, "id" | "issuedAt" | "expiresAt">,
+  opts?: { ttlDays?: number },
+): { body: PassportBody; signature: string; verifyUrl: string } {
+  const id = `pp_${Date.now()}`;
+  const issuedAt = new Date().toISOString();
+  const expiresAt = new Date(Date.now() + (opts?.ttlDays ?? 90) * 86400_000).toISOString();
+  const fullBody: PassportBody = { ...body, id, issuedAt, expiresAt };
+
+  let signature = "demo_unsigned";
+  try {
+    signature = sign(fullBody as unknown as Record<string, unknown>);
+  } catch {
+    // no key in env — demo mode
+  }
+
+  return { body: fullBody, signature, verifyUrl: `/verify/${id}` };
+}

@@ -1,6 +1,6 @@
 # Finnovo
 
-A multi-agent finance copilot, built for the Finnovo hackathon at INSAT (2026-04-18).
+A multi-agent credit passport platform, built for the Sanad hackathon at INSAT (2026-04-18).
 
 **Core idea.** A supervisor agent dispatches specialist agents (fundamentals, news, risk, critic, composer) that collaborate to answer financial questions. The UI streams their reasoning trace live — the transparency _is_ the product.
 

@@ -149,7 +149,7 @@ function ProfileSlot({
 // Main page
 // ---------------------------------------------------------------------------
 
-export default function ChatPage() {
+function ChatPageInner() {
   const searchParams = useSearchParams();
   const isOffline = searchParams.get("offline") === "1";
 
@@ -278,11 +278,11 @@ export default function ChatPage() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -56, opacity: 0 }}
             transition={{ duration: 0.28, ease: "easeOut" }}
-            className="bg-brand-gold/20 border-brand-gold/40 relative z-30 flex items-center justify-between gap-4 border-b px-6 py-2.5"
+            className="bg-[var(--linear-accent)]/15 border-[var(--linear-accent)]/30 relative z-30 flex items-center justify-between gap-4 border-b px-6 py-2.5"
           >
             <p className="text-foreground text-sm font-medium">
               Vous semblez gérer une activité régulière.{" "}
-              <span className="text-brand-600 font-semibold">Envie de débloquer Daiyn ?</span>
+              <span className="text-[var(--linear-accent)] font-semibold">Envie de débloquer Daiyn ?</span>
             </p>
             <div className="flex shrink-0 items-center gap-2">
               <Button
@@ -296,7 +296,7 @@ export default function ChatPage() {
               <Button
                 size="sm"
                 asChild
-                className="bg-brand-500 hover:bg-brand-600 h-7 px-3 text-xs text-white"
+                className="bg-[var(--linear-brand)] hover:bg-[var(--linear-accent)] h-7 px-3 text-xs text-white"
               >
                 <a href="/dashboard/upload">
                   Accéder à Daiyn
@@ -325,8 +325,8 @@ export default function ChatPage() {
               onClick={() => switchPersona(p)}
               className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                 persona === p
-                  ? "bg-brand-500 border-brand-500 text-white"
-                  : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                    ? "bg-[var(--linear-brand)] border-[var(--linear-brand)] text-white"
+                    : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
               }`}
             >
               {p}
@@ -339,7 +339,7 @@ export default function ChatPage() {
           className={
             isOffline
               ? "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400"
-              : "border-brand-500/40 bg-brand-500/10 text-brand-600"
+              : "border-[var(--linear-brand)]/40 bg-[var(--linear-brand)]/10 text-[var(--linear-accent)]"
           }
           variant="outline"
         >
@@ -366,7 +366,7 @@ export default function ChatPage() {
 
             {/* Identity */}
             <section className="mb-4 space-y-3">
-              <p className="text-brand-500 text-[10px] font-semibold tracking-widest uppercase">
+              <p className="text-[var(--linear-text-3)] text-[10px] font-semibold tracking-widest uppercase">
                 Identity
               </p>
               <ProfileSlot label="Name" value={profile.identity?.name} icon={User} />
@@ -378,7 +378,7 @@ export default function ChatPage() {
 
             {/* Employment */}
             <section className="mb-4 space-y-3">
-              <p className="text-brand-500 text-[10px] font-semibold tracking-widest uppercase">
+              <p className="text-[var(--linear-text-3)] text-[10px] font-semibold tracking-widest uppercase">
                 Employment
               </p>
               <ProfileSlot label="Type" value={profile.employment?.type} icon={Briefcase} />
@@ -393,7 +393,7 @@ export default function ChatPage() {
 
             {/* Banking */}
             <section className="mb-4 space-y-3">
-              <p className="text-brand-500 text-[10px] font-semibold tracking-widest uppercase">
+              <p className="text-[var(--linear-text-3)] text-[10px] font-semibold tracking-widest uppercase">
                 Banking
               </p>
               <ProfileSlot
@@ -414,7 +414,7 @@ export default function ChatPage() {
 
             {/* Goals */}
             <section className="mb-4 space-y-3">
-              <p className="text-brand-500 text-[10px] font-semibold tracking-widest uppercase">
+              <p className="text-[var(--linear-text-3)] text-[10px] font-semibold tracking-widest uppercase">
                 Goals
               </p>
               <ProfileSlot label="Short-term" value={profile.goals?.short_term} icon={Target} />
@@ -424,7 +424,7 @@ export default function ChatPage() {
 
             {/* SME Signal */}
             <section className="mb-2">
-              <p className="text-brand-500 mb-3 text-[10px] font-semibold tracking-widest uppercase">
+              <p className="text-[var(--linear-text-3)] mb-3 text-[10px] font-semibold tracking-widest uppercase">
                 SME Signal
               </p>
               <div className="flex items-center gap-3">
@@ -450,7 +450,7 @@ export default function ChatPage() {
                       exit={{ opacity: 0, x: -8 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <Badge className="bg-brand-500 border-transparent text-[10px] text-white">
+                      <Badge className="bg-[var(--linear-brand)] border-transparent text-[10px] text-white">
                         Escalation ready
                       </Badge>
                     </motion.div>
@@ -462,7 +462,7 @@ export default function ChatPage() {
                       exit={{ opacity: 0, x: -8 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <Badge variant="outline" className="border-brand-gold/60 text-[10px]">
+                      <Badge variant="outline" className="border-[var(--linear-accent)]/40 text-[10px]">
                         Signal detected
                       </Badge>
                     </motion.div>
@@ -474,5 +474,13 @@ export default function ChatPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <React.Suspense fallback={<div className="flex h-screen items-center justify-center text-sm text-muted-foreground">Loading…</div>}>
+      <ChatPageInner />
+    </React.Suspense>
   );
 }

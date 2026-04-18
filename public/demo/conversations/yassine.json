@@ -1,0 +1,29 @@
+{
+  "persona": { "name": "Yassine", "age": 28, "city": "Tunis", "lang_mix": "ar-fr" },
+  "turns": [
+    { "role": "user", "text": "salam, chneya ta3mel sanad?", "lang": "mixed" },
+    { "role": "assistant", "text": "Marhba Yassine! Sanad yhebek tchouf winak fel financial journey dyalek. Chnou smitk o fin saken?", "expected_profile_delta": {} },
+    { "role": "user", "text": "ismi Yassine, 3andi 28 ans, saken fi Tunis el-Menzah", "lang": "mixed" },
+    { "role": "assistant", "text": "Ahlan Yassine! Ta3mel b salaire fixe walla 9ais 3la ro7ek — gig, commerce, walla projet?", "expected_profile_delta": { "identity": { "name": "Yassine", "age_band": "25-34", "city": "Tunis" } } },
+    { "role": "user", "text": "3andi bsita micro-commerce, nbii3 3tefet w accessoires — online w fel 3omra bel-yad", "lang": "mixed" },
+    { "role": "assistant", "text": "Mezyan! Micro-commerce online + physique — c'est un vrai business. Revenue dyalek kol chhar tkhammen 9adde7?", "expected_profile_delta": { "employment": { "type": "micro-commerce" } } },
+    { "role": "user", "text": "des fois 1200, des fois 1800 DT, depends el-maw9ef. Ramadan w saison estivale — c'est le meilleur", "lang": "mixed" },
+    { "role": "assistant", "text": "1200–1800 TND/mois — c'est consistant. T3awel b banque walla wallet (D17, Flouci)?", "expected_profile_delta": { "employment": { "income_band": "1200-1800 TND" } } },
+    { "role": "user", "text": "ma3andich compte bancaire, nes7dem D17 w Flouci bas. El banque t3awdni bel paperasse", "lang": "mixed" },
+    { "role": "assistant", "text": "D17 + Flouci — mrigel. Historique transactions mta3ek yestahel kif dossier financier. Chnou cible dyalek 9riba? Achat stock, equipement...?", "expected_profile_delta": { "banking": { "has_account": false, "wallet": "D17 / Flouci" } } },
+    { "role": "user", "text": "nheb na5ou stock kbir lel Ramadan — chhar mouiyen mesel. Tahab7ali 30 alf DT", "lang": "mixed" },
+    { "role": "assistant", "text": "30 000 TND pour le stock de Ramadan — c'est un besoin en fonds de roulement classique. Yassine, rak 3andek clients reguliers, factures, w D17 feed? SME signal actif — je t'oriente vers Sanad PME.", "expected_profile_delta": { "goals": { "short_term": "stock credit 30k TND" }, "sme_signal": 3 }, "escalate": true },
+    { "role": "user", "text": "aiwa, 3andi clients bich nbi3lhom bil facture. Chna Sanad PME?", "lang": "mixed" },
+    { "role": "assistant", "text": "Sanad PME te genere un Credit Passport complet en moins de 5 minutes. Tu uploades tes factures + historique D17, nos agents IA calculent ton score et le dossier est transmis directement aux banques partenaires comme BIAT. Pas de paperasse manuelle.", "expected_profile_delta": { "sme_signal": 3, "escalated": true } },
+    { "role": "user", "text": "waw, haka 7aja mohimma. Kifech nabda?", "lang": "mixed" },
+    { "role": "assistant", "text": "Simple: clique sur 'Commencer mon dossier' ci-dessous, uploade 3 mois de transactions D17 et tes dernieres factures. L'analyse prend 5 minutes. Tu recevras ton Sanad Passport signe numeriquement — les banques l'acceptent directement.", "expected_profile_delta": {} }
+  ],
+  "terminal_state": {
+    "identity": { "name": "Yassine", "age_band": "25-34", "city": "Tunis" },
+    "employment": { "type": "micro-commerce", "income_band": "1200-1800 TND" },
+    "banking": { "has_account": false, "wallet": "D17 / Flouci" },
+    "goals": { "short_term": "stock credit 30k TND" },
+    "sme_signal": 3,
+    "escalated": true
+  }
+}

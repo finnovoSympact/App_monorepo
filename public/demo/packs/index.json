@@ -1,0 +1,7 @@
+{
+  "packs": [
+    { "id": "cafe-el-wafa", "name": "Café El Wafa SARL", "sector": "Food & Beverage", "city": "Tunis — La Marsa", "status": "clean", "creditScore": 72 },
+    { "id": "brico-sfax", "name": "Brico Sfax Matériaux", "sector": "Hardware & Construction", "city": "Sfax", "status": "borderline", "creditScore": 54 },
+    { "id": "souq-digital", "name": "SouqDigital Marketplace", "sector": "E-commerce", "city": "Tunis — Lac 2", "status": "growing", "creditScore": 68 }
+  ]
+}

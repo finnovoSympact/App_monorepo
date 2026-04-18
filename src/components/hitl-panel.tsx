@@ -1,64 +1,179 @@
-// Per-node HITL controls: Approve / Refine with AI / Take over manually
-// TODO §5: wire to /api/pipeline/hitl
 "use client";
 
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { CheckCircle, Sparkles, Edit3, PauseCircle } from "lucide-react";
 import * as React from "react";
 
 interface Props {
-  runId: string;
   nodeKey: string;
-  nodeOutput: unknown;
-  onResume?: () => void;
+  nodeLabel: string;
+  summary: string;
+  runId: string;
+  onAction: (action: "approve" | "refine" | "takeover", feedback?: string) => void;
 }
 
-export function HitlPanel({ runId, nodeKey, nodeOutput, onResume }: Props) {
-  const [feedback, setFeedback] = React.useState("");
+export function HitlPanel({ nodeLabel, summary, onAction }: Props) {
   const [mode, setMode] = React.useState<"idle" | "refine" | "takeover">("idle");
+  const [feedback, setFeedback] = React.useState("");
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  async function submit(hitlMode: "approve" | "refine" | "takeover", override?: unknown) {
-    await fetch("/api/pipeline/hitl", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ runId, nodeKey, mode: hitlMode, feedback, override }),
-    });
-    onResume?.();
+  async function handleAction(action: "approve" | "refine" | "takeover") {
+    setIsSubmitting(true);
+    try {
+      await onAction(action, feedback);
+      setFeedback("");
+      setMode("idle");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
-    <div className="space-y-4 rounded-lg border border-amber-500/40 bg-amber-50/5 p-4">
-      <p className="text-sm font-medium text-amber-600">
-        Awaiting human review — node <code>{nodeKey}</code>
-      </p>
-      <pre className="bg-muted max-h-48 overflow-auto rounded p-3 text-xs">
-        {JSON.stringify(nodeOutput, null, 2)}
-      </pre>
+    <motion.div
+      role="dialog"
+      aria-labelledby="hitl-heading"
+      aria-modal="false"
+      initial={{ y: 100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: 100, opacity: 0 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-amber-500/40 bg-amber-50/95 backdrop-blur dark:bg-amber-950/95"
+    >
+      <div className="mx-auto max-w-6xl px-6 py-6">
+        <div className="flex items-start gap-3">
+          <div aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-amber-500/15">
+            <PauseCircle aria-hidden="true" className="size-5 text-amber-600" />
+          </div>
+          <div className="flex-1 space-y-4">
+            <div>
+              <h3 id="hitl-heading" className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+                ⏸ Awaiting your review — {nodeLabel}
+              </h3>
+              <p className="mt-1 text-sm leading-relaxed text-amber-800/90 dark:text-amber-200/80">
+                {summary}
+              </p>
+            </div>
 
-      {mode === "refine" && (
-        <Textarea
-          rows={3}
-          value={feedback}
-          onChange={(e) => setFeedback(e.target.value)}
-          placeholder="Feedback for AI refinement…"
-        />
-      )}
+            {mode === "refine" && (
+              <motion.div
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.18 }}
+              >
+                <Textarea
+                  rows={3}
+                  value={feedback}
+                  onChange={(e) => setFeedback(e.target.value)}
+                  placeholder="Provide feedback for AI refinement (e.g., 'Use a more conservative estimate for Q4 revenue')"
+                  className="border-amber-500/30 bg-white/50 text-sm dark:bg-black/20"
+                />
+              </motion.div>
+            )}
 
-      <div className="flex gap-2">
-        <Button size="sm" variant="default" onClick={() => submit("approve")}>
-          Approve
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => (mode === "refine" ? submit("refine") : setMode("refine"))}
-        >
-          {mode === "refine" ? "Send feedback" : "Refine with AI"}
-        </Button>
-        <Button size="sm" variant="ghost" onClick={() => setMode("takeover")}>
-          Take over
-        </Button>
+            {mode === "takeover" && (
+              <motion.div
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.18 }}
+              >
+                <Textarea
+                  rows={4}
+                  value={feedback}
+                  onChange={(e) => setFeedback(e.target.value)}
+                  placeholder="Write your manual override here. This will replace the node output entirely."
+                  className="border-amber-500/30 bg-white/50 font-mono text-xs dark:bg-black/20"
+                />
+              </motion.div>
+            )}
+
+            <div className="flex flex-wrap gap-2">
+              {mode === "idle" && (
+                <>
+                  <Button
+                    size="sm"
+                    variant="default"
+                    onClick={() => handleAction("approve")}
+                    disabled={isSubmitting}
+                    className="bg-emerald-600 hover:bg-emerald-700"
+                  >
+                    <CheckCircle aria-hidden="true" className="size-4" />
+                    Approve
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setMode("refine")}
+                    className="border-amber-500/30"
+                  >
+                    <Sparkles aria-hidden="true" className="size-4" />
+                    Refine with AI
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setMode("takeover")}
+                    className="border-amber-500/30"
+                  >
+                    <Edit3 aria-hidden="true" className="size-4" />
+                    Take Over
+                  </Button>
+                </>
+              )}
+
+              {mode === "refine" && (
+                <>
+                  <Button
+                    size="sm"
+                    variant="default"
+                    onClick={() => handleAction("refine")}
+                    disabled={isSubmitting || !feedback.trim()}
+                  >
+                    <Sparkles className="size-4" />
+                    Submit feedback
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setMode("idle");
+                      setFeedback("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </>
+              )}
+
+              {mode === "takeover" && (
+                <>
+                  <Button
+                    size="sm"
+                    variant="default"
+                    onClick={() => handleAction("takeover")}
+                    disabled={isSubmitting || !feedback.trim()}
+                    className="bg-amber-600 hover:bg-amber-700"
+                  >
+                    <Edit3 className="size-4" />
+                    Submit override
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setMode("idle");
+                      setFeedback("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
