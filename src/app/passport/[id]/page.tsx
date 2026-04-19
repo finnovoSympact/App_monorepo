@@ -1,8 +1,10 @@
 // Sanad Passport — printable, bank-grade layout
+import Image from "next/image";
 import { readFileSync } from "fs";
 import path from "path";
 import { PrintButton } from "./print-button";
 import { ArabicMark } from "@/components/sanad/arabic-mark";
+import { getPassport } from "@/lib/passport-store";
 
 interface KPI {
   label: string;
@@ -47,11 +49,28 @@ interface Passport {
 }
 
 function loadPassport(id: string): Passport | null {
+  // First try the live in-memory store (populated by the pipeline on live runs)
+  const live = getPassport(id);
+  if (live) return live as Passport;
+
+  // Fall back to the canned demo fixture
   try {
     const filePath = path.join(process.cwd(), "public", "demo", "canned-trace.json");
     const raw = readFileSync(filePath, "utf-8");
     const data = JSON.parse(raw) as { passport?: Passport };
     if (data.passport && data.passport.id === id) return data.passport;
+
+    // Also check demo packs
+    const packsDir = path.join(process.cwd(), "public", "demo", "packs");
+    try {
+      const index = JSON.parse(readFileSync(path.join(packsDir, "index.json"), "utf-8")) as Array<{ id: string }>;
+      for (const entry of index) {
+        const packPath = path.join(packsDir, `${entry.id}.json`);
+        const pack = JSON.parse(readFileSync(packPath, "utf-8")) as { passport?: Passport };
+        if (pack.passport && pack.passport.id === id) return pack.passport;
+      }
+    } catch { /* no packs */ }
+
     return null;
   } catch {
     return null;
@@ -123,15 +142,122 @@ function ScoreDial({ score, style }: { score: number; style: ReturnType<typeof s
   );
 }
 
-export default function PassportPage({ params }: { params: { id: string } }) {
-  const passport = loadPassport(params.id);
+// ── Balance-sheet style financial summary ─────────────────────────────────────
+// Inspired by the attached PDF balance sheet (Passif) format
+function FinancialSummary({
+  kpis,
+  risks,
+  score,
+}: {
+  kpis: KPI[];
+  risks: Risk[];
+  score: number;
+}) {
+  const highRisks = risks.filter((r) => r.severity === "high").length;
+  const medRisks = risks.filter((r) => r.severity === "medium").length;
+  const aboveKpis = kpis.filter((k) => k.status === "above" || k.status === "ok").length;
+
+  // Build a balance-sheet-like table from KPIs split into "strengths" (actif) and "risks" (passif)
+  const strengths = kpis.filter((k) => k.status === "above" || k.status === "ok");
+  const weaknesses = kpis.filter((k) => k.status === "below" || k.status === "at_risk");
+
+  return (
+    <div className="border-b border-slate-100 px-8 py-6">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+          Financial Position Summary
+        </h2>
+        <div className="flex items-center gap-1.5 rounded-full bg-[#26397A]/8 px-3 py-1">
+          <Image src="/logo.svg" alt="Finnovo" width={56} height={32} className="h-4 w-auto opacity-70" />
+          <span className="font-mono text-[9px] text-[#26397A]/70 tracking-wider uppercase">Certified</span>
+        </div>
+      </div>
+
+      {/* Two-column balance sheet layout */}
+      <div className="grid grid-cols-2 gap-0 overflow-hidden rounded-xl border border-slate-200 text-xs">
+
+        {/* Column headers */}
+        <div className="border-b border-r border-slate-200 bg-emerald-50 px-4 py-2.5">
+          <p className="font-semibold text-emerald-700 uppercase tracking-wide text-[10px]">Strengths (Actif)</p>
+        </div>
+        <div className="border-b border-slate-200 bg-red-50 px-4 py-2.5">
+          <p className="font-semibold text-red-700 uppercase tracking-wide text-[10px]">Risk Factors (Passif)</p>
+        </div>
+
+        {/* Rows */}
+        {Array.from({ length: Math.max(strengths.length, weaknesses.length, 3) }).map((_, i) => {
+          const s = strengths[i];
+          const w = weaknesses[i];
+          return (
+            <div key={i} className="contents">
+              <div className={`border-r border-slate-100 px-4 py-2.5 ${i % 2 === 0 ? "bg-white" : "bg-slate-50/40"}`}>
+                {s ? (
+                  <div>
+                    <p className="text-slate-600">{s.label}</p>
+                    <p className="font-bold text-slate-800">{s.value}</p>
+                    <p className="text-[10px] text-emerald-600">↑ {s.benchmark}</p>
+                  </div>
+                ) : (
+                  <p className="text-slate-200">—</p>
+                )}
+              </div>
+              <div className={`px-4 py-2.5 ${i % 2 === 0 ? "bg-white" : "bg-slate-50/40"}`}>
+                {w ? (
+                  <div>
+                    <p className="text-slate-600">{w.label}</p>
+                    <p className="font-bold text-slate-800">{w.value}</p>
+                    <p className="text-[10px] text-red-500">↓ {w.benchmark}</p>
+                  </div>
+                ) : (
+                  <p className="text-slate-200">—</p>
+                )}
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Totals row */}
+        <div className="border-r border-t border-slate-200 bg-emerald-50 px-4 py-2.5">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700">Total Positive Signals</p>
+          <p className="text-lg font-black text-emerald-600">{aboveKpis} / {kpis.length}</p>
+        </div>
+        <div className="border-t border-slate-200 bg-red-50 px-4 py-2.5">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-red-700">Total Risk Flags</p>
+          <p className="text-lg font-black text-red-600">{highRisks}H + {medRisks}M</p>
+        </div>
+      </div>
+
+      {/* Score summary row — like "Total Capitaux Propres" in the PDF */}
+      <div className="mt-3 flex items-center justify-between rounded-xl border border-[#26397A]/20 bg-[#26397A]/5 px-5 py-3">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-[#26397A]/70">
+            TOTAL CREDIT POSITION · Finnovo Score
+          </p>
+          <p className="mt-0.5 text-xs text-slate-500">
+            Balance of financial strengths vs risk factors — as assessed by Finnovo AI pipeline
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-3xl font-black" style={{ color: score >= 70 ? "#16a34a" : score >= 50 ? "#d97706" : "#dc2626" }}>
+            {score}
+          </p>
+          <p className="text-[10px] text-slate-400 uppercase tracking-wider">/ 100</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default async function PassportPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const passport = loadPassport(id);
 
   if (!passport) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50">
         <div className="text-center">
           <p className="text-lg font-semibold text-slate-700">Passport not found</p>
-          <p className="mt-1 text-sm text-slate-400">ID: {params.id}</p>
+          <p className="mt-1 text-sm text-slate-400">ID: {id}</p>
         </div>
       </main>
     );
@@ -175,11 +301,15 @@ export default function PassportPage({ params }: { params: { id: string } }) {
                 {passport.city} · {passport.sector}
               </p>
             </div>
-            <div className="text-right">
-              <p className="text-sm font-semibold text-slate-700">Sanad Credit Passport</p>
-              <p className="mt-1 font-mono text-xs text-slate-400">{passport.id}</p>
-              <p className="text-xs text-slate-400">Issued {issuedDate}</p>
-              <p className="text-xs text-slate-400">Expires {expiresDate}</p>
+            <div className="flex flex-col items-end gap-2">
+              {/* Finnovo logo top-right */}
+              <Image src="/logo.svg" alt="Finnovo" width={96} height={54} className="h-7 w-auto opacity-90" />
+              <div className="text-right">
+                <p className="text-sm font-semibold text-slate-700">Credit Passport</p>
+                <p className="mt-0.5 font-mono text-xs text-slate-400">{passport.id}</p>
+                <p className="text-xs text-slate-400">Issued {issuedDate}</p>
+                <p className="text-xs text-slate-400">Expires {expiresDate}</p>
+              </div>
             </div>
           </div>
 
@@ -277,25 +407,27 @@ export default function PassportPage({ params }: { params: { id: string } }) {
             </ul>
           </div>
 
+          {/* ── Financial Summary (balance-sheet style) ── */}
+          <FinancialSummary kpis={passport.kpis} risks={passport.risks} score={passport.creditScore} />
+
           {/* XAI log */}
-          <div className="border-b border-slate-100 px-8 py-6">
-            <details>
-              <summary className="cursor-pointer text-xs font-semibold tracking-widest text-slate-400 uppercase select-none">
+          <div className="border-b border-[#e2d9c8] px-8 py-6">            <details>
+              <summary className="cursor-pointer text-xs font-semibold tracking-widest text-[#8faabe] uppercase select-none">
                 Explainability Log (XAI) ▸
               </summary>
-              <p className="mt-3 text-sm leading-relaxed text-slate-500">{passport.xaiLog}</p>
+              <p className="mt-3 text-sm leading-relaxed text-[#5a7299]">{passport.xaiLog}</p>
             </details>
           </div>
 
           {/* Signature footer */}
           <div className="flex items-center justify-between px-8 py-5">
-            <div className="text-xs text-slate-400">
-              <p className="font-semibold text-slate-500">Ed25519 Signature</p>
+            <div className="text-xs text-[#8faabe]">
+              <p className="font-semibold text-[#5a7299]">Ed25519 Signature</p>
               <p className="mt-0.5 font-mono">{sigShort}</p>
               {passport.verifyUrl && (
                 <a
                   href={passport.verifyUrl}
-                  className="mt-1 inline-block text-blue-500 hover:underline"
+                  className="mt-1 inline-block text-blue-600 hover:underline"
                 >
                   Verify this passport →
                 </a>

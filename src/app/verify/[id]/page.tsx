@@ -26,8 +26,9 @@ function loadPassportMeta(id: string): PassportMeta | null {
   }
 }
 
-export default function VerifyPage({ params }: { params: { id: string } }) {
-  const meta = loadPassportMeta(params.id);
+export default async function VerifyPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const meta = loadPassportMeta(id);
 
   if (!meta) {
     return (
@@ -47,7 +48,7 @@ export default function VerifyPage({ params }: { params: { id: string } }) {
           </div>
           <h1 className="mt-6 font-instrument text-2xl leading-tight text-slate-800">Passport Not Found</h1>
           <p className="mt-2 text-sm text-slate-500">
-            No passport with ID <span className="font-mono text-slate-700">{params.id}</span> was
+            No passport with ID <span className="font-mono text-slate-700">{id}</span> was
             found in the registry.
           </p>
           <p className="mt-4 text-xs text-slate-400">

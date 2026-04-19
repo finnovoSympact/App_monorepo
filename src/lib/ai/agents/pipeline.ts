@@ -1,5 +1,6 @@
 // Layer 2 LangGraph 5-node pipeline: Formatter → Orchestrator → Executor → Reviewer → Finalizer
-import { StateGraph, Annotation, START, END } from "@langchain/langgraph";
+import { StateGraph, Annotation, START, END, interrupt, MemorySaver, Command } from "@langchain/langgraph";
+import { storePassport } from "@/lib/passport-store";
 import { HumanMessage } from "@langchain/core/messages";
 import type { ChatOpenAI } from "@langchain/openai";
 import type { FormattedCorpus } from "./formatter";
@@ -26,6 +27,8 @@ export interface TraceEvent {
   at: number;
   nodeKey: NodeKey;
   costEstimate?: number;
+  /** Full LLM prompt + response for the "inspect this node" panel */
+  reasoning?: string;
 }
 
 export interface DraftPassport {
@@ -86,14 +89,13 @@ export const PipelineState = Annotation.Root({
     default: () => [],
   }),
   hitlInterrupts: Annotation<
-    Record<NodeKey, { mode: HitlMode; feedback?: string; override?: unknown }>
+    Partial<Record<NodeKey, { mode: HitlMode; feedback?: string; override?: unknown }>>
   >({
     reducer: (
-      a: Record<NodeKey, { mode: HitlMode; feedback?: string; override?: unknown }>,
-      b: Record<NodeKey, { mode: HitlMode; feedback?: string; override?: unknown }>,
+      a: Partial<Record<NodeKey, { mode: HitlMode; feedback?: string; override?: unknown }>>,
+      b: Partial<Record<NodeKey, { mode: HitlMode; feedback?: string; override?: unknown }>>,
     ) => ({ ...a, ...b }),
-    default: () =>
-      ({}) as Record<NodeKey, { mode: HitlMode; feedback?: string; override?: unknown }>,
+    default: () => ({}),
   }),
   revisionLoop: Annotation<number>({
     reducer: (_: number, next: number) => next,
@@ -385,6 +387,28 @@ Return ONLY the 2-sentence summary, no JSON.`;
     /* use default */
   }
 
+  // Capture LLM reasoning for the trace inspector panel
+  const llmReasoning = [
+    `📊 KPI Analysis:`,
+    `  Gross Margin: ${grossMargin}% (sector avg: ${benchmarks.grossMarginAvg}%) → ${grossMargin >= benchmarks.grossMarginAvg ? "above benchmark ✓" : "below benchmark ✗"}`,
+    `  Current Ratio: ${currentRatio}x (target: ≥1.5x) → ${currentRatio >= 1.5 ? "ok ✓" : "warn ✗"}`,
+    `  Debt/Equity: ${debtToEquity}x (avg: ${benchmarks.debtToEquityAvg}x) → ${debtToEquity <= benchmarks.debtToEquityAvg ? "ok ✓" : "warn ✗"}`,
+    `  Cash Runway: ${cashRunway} days → ${cashRunway >= 90 ? "ok ✓" : cashRunway >= 60 ? "warn" : "alert ✗"}`,
+    ``,
+    `⚠️ Risks flagged: ${risks.map((r) => `${r.kind} [${r.severity}]`).join(", ") || "none"}`,
+    ``,
+    `📈 Score computation: base 50`,
+    `  ${grossMargin > benchmarks.grossMarginAvg ? "+15 (margin above avg)" : grossMargin > benchmarks.grossMarginAvg * 0.8 ? "+5 (margin near avg)" : "+0 (margin below avg)"}`,
+    `  ${currentRatio >= 1.5 ? "+10 (ratio ≥1.5)" : currentRatio >= 1.0 ? "+5 (ratio ≥1.0)" : "+0"}`,
+    `  ${debtToEquity <= benchmarks.debtToEquityAvg ? "+10 (D/E within range)" : "+0"}`,
+    `  ${cashRunway >= 90 ? "+10 (runway ≥90d)" : cashRunway >= 60 ? "+5 (runway ≥60d)" : "+0"}`,
+    `  ${risks.filter((r) => r.severity === "high").length > 0 ? `-${risks.filter((r) => r.severity === "high").length * 8} (high-severity risks)` : "+0"}`,
+    `  = ${score}/100 (${scoreLabel})`,
+    ``,
+    `🤖 LLM Executive Summary:`,
+    summary,
+  ].join("\n");
+
   const kpis = [
     {
       label: "Gross Margin",
@@ -434,11 +458,30 @@ Return ONLY the 2-sentence summary, no JSON.`;
     revisionCount: newRevisionLoop,
   };
 
+  // HITL interrupt: pause after executor so operator can review before the reviewer runs
+  const hitlResponse = interrupt({
+    question: "Review executor output before proceeding to quality reviewer",
+    nodeKey: "c_executor",
+    draft: { creditScore: score, scoreLabel, summary },
+  }) as { mode: "approve" | "refine" | "takeover"; feedback?: string } | undefined;
+
+  // If operator provided manual override text, swap the summary
+  if (hitlResponse?.mode === "takeover" && hitlResponse.feedback) {
+    draft.summary = hitlResponse.feedback;
+    draft.xaiLog += " [Human override applied]";
+  } else if (hitlResponse?.mode === "refine" && hitlResponse.feedback) {
+    // Store feedback so the next revision loop picks it up
+    draft.xaiLog += ` [Refinement requested: ${hitlResponse.feedback}]`;
+  }
+
   return {
     draft,
     revisionLoop: newRevisionLoop,
+    hitlInterrupts: hitlResponse
+      ? { c_executor: { mode: hitlResponse.mode === "approve" ? "ai" : hitlResponse.mode === "refine" ? "ai_refined" : "manual", feedback: hitlResponse.feedback ?? "" } }
+      : {},
     currentNode: "c_executor",
-    trace: [traceEvent("c_executor", toolLog, "out", "completed")],
+    trace: [{ ...traceEvent("c_executor", toolLog, "out", "completed"), reasoning: llmReasoning }],
   };
 }
 
@@ -504,7 +547,7 @@ async function nodeFinalizer(state: PS): Promise<Partial<PS>> {
   // No LLM or tool-calling required — pure template substitution.
   const businessPlan = buildBusinessPlan(draft, state.smeId);
 
-  const { body, verifyUrl } = issuePassport(
+  const { body, signature, verifyUrl } = issuePassport(
     {
       smeId: state.smeId,
       companyName: draft.companyName,
@@ -523,6 +566,9 @@ async function nodeFinalizer(state: PS): Promise<Partial<PS>> {
 
   // Attach the populated business plan to the passport body for downstream rendering
   (body as unknown as Record<string, unknown>).businessPlan = businessPlan;
+
+  // Write to in-memory store so /passport/:id can render it without a DB
+  storePassport({ ...body, signature, verifyUrl });
 
   return {
     passportId: body.id,
@@ -608,6 +654,7 @@ function shouldRevise(state: PS): "c_executor" | "e_finalizer" {
 
 // --- Build graph ---
 export function buildPipelineGraph() {
+  const checkpointer = new MemorySaver();
   const graph = new StateGraph(PipelineState)
     .addNode("a_formatter", nodeFormatter)
     .addNode("b_orchestrator", nodeOrchestrator)
@@ -624,5 +671,8 @@ export function buildPipelineGraph() {
     })
     .addEdge("e_finalizer", END);
 
-  return graph.compile();
+  return graph.compile({ checkpointer });
 }
+
+export type PipelineGraph = ReturnType<typeof buildPipelineGraph>;
+export { Command };

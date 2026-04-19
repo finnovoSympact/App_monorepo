@@ -18,6 +18,7 @@ export interface PipelineNode {
 interface Props {
   nodes: PipelineNode[];
   activeNode: string | null;
+  onNodeClick?: (node: PipelineNode) => void;
 }
 
 const nodeIcons: Record<string, typeof FileText> = {
@@ -37,7 +38,7 @@ const statusColors: Record<NodeStatus, string> = {
   approved: "bg-emerald-600",
 };
 
-export function PipelineGraph({ nodes, activeNode }: Props) {
+export function PipelineGraph({ nodes, activeNode, onNodeClick }: Props) {
   const showRevisionLoop =
     nodes.some((n) => n.key === "d_reviewer" && n.status === "revised") ||
     nodes.some((n) => n.key === "c_executor" && n.status === "running");
@@ -57,11 +58,15 @@ export function PipelineGraph({ nodes, activeNode }: Props) {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: idx * 0.1, duration: 0.18 }}
+                  onClick={() => node.status !== "pending" && onNodeClick?.(node)}
                   className={cn(
                     "relative flex min-w-[140px] flex-col items-center gap-2 rounded-lg border p-4 transition-all",
                     isActive
                       ? "border-indigo-500/50 bg-indigo-500/5 shadow-sm"
                       : "border-border/40 bg-card/50",
+                    node.status !== "pending" && onNodeClick
+                      ? "cursor-pointer hover:border-indigo-400/60 hover:bg-indigo-500/5"
+                      : "",
                   )}
                 >
                   <div

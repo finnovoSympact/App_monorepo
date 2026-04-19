@@ -6,106 +6,144 @@
 :root {
   --radius: 0.65rem;
 
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-
-  /* Finnovo brand tones — a teal/gold mix that reads "fintech but warm" */
-  --brand-500: oklch(0.72 0.15 175);
-  --brand-600: oklch(0.62 0.17 175);
-  --brand-gold: oklch(0.82 0.13 85);
-
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-}
-
-.dark {
-  /* ── Linear marketing canvas ── */
-  --background: #08090a;
-  --foreground: #f7f8f8;
-
-  --card: #191a1b;
-  --card-foreground: #f7f8f8;
-
-  --popover: #191a1b;
-  --popover-foreground: #f7f8f8;
-
-  /* Brand indigo — the one chromatic color */
-  --primary: #5e6ad2;
+  /* ── Finnovo Cream + Navy — extracted from logo.svg ── */
+  --background: #fdfaf5;        /* warm page canvas */
+  --foreground: #26397A;        /* logo navy — primary text */
+  --card: #ffffff;
+  --card-foreground: #26397A;
+  --popover: #ffffff;
+  --popover-foreground: #26397A;
+  --primary: #26397A;           /* exact logo navy */
   --primary-foreground: #ffffff;
-
-  --secondary: #28282c;
-  --secondary-foreground: #f7f8f8;
-
-  --muted: #0f1011;
-  --muted-foreground: #8a8f98;
-
-  --accent: #7170ff;
+  --secondary: #F4E5CC;         /* exact logo cream */
+  --secondary-foreground: #26397A;
+  --muted: #f7f0e6;
+  --muted-foreground: #6b7db3;  /* lighter navy */
+  --accent: #3a4f9a;            /* lighter navy for hover */
   --accent-foreground: #ffffff;
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: #ffffff;
+  --border: #e8dcc8;            /* warm cream border */
+  --input: #e8dcc8;
+  --ring: rgba(38, 57, 122, 0.3);
 
-  --destructive: oklch(0.65 0.22 28);
-  --destructive-foreground: #f7f8f8;
+  /* ── Cream scale (from #F4E5CC) ── */
+  --cream-50:  #fdfaf5;
+  --cream-100: #f9f2e7;
+  --cream-200: #F4E5CC;
+  --cream-300: #e8dcc8;
+  --cream-400: #d4c3a0;
 
-  /* Semi-transparent white borders — never solid dark-on-dark */
-  --border: rgba(255, 255, 255, 0.08);
-  --input: rgba(255, 255, 255, 0.08);
-  --ring: rgba(113, 112, 255, 0.45);
+  /* ── Navy scale (from #26397A) ── */
+  --navy-900: #1a2654;
+  --navy-800: #26397A;
+  --navy-700: #3a4f9a;
+  --navy-500: #6b7db3;
+  --navy-300: #a8b4d4;
 
-  /* Charts — indigo family */
-  --chart-1: #5e6ad2;
-  --chart-2: #7170ff;
-  --chart-3: #10b981;
-  --chart-4: #828fff;
-  --chart-5: #d0d6e0;
+  /* ── Brand aliases ── */
+  --brand-500: #3a4f9a;
+  --brand-600: #26397A;
+  --brand-gold: #F4E5CC;
+  --terracotta: #6b7db3;
+  --terracotta-light: #dce3f2;
 
-  /* ── Linear surface scale ── */
-  --linear-bg-0: #010102;
-  --linear-bg-1: #08090a;
-  --linear-bg-2: #0f1011;
-  --linear-bg-3: #191a1b;
-  --linear-bg-4: #28282c;
+  /* ── Linear surface scale (light) ── */
+  --linear-bg-0: #fdfaf5;
+  --linear-bg-1: #f9f2e7;
+  --linear-bg-2: #ffffff;
+  --linear-bg-3: #F4E5CC;
+  --linear-bg-4: #e8dcc8;
 
   /* ── Text hierarchy ── */
-  --linear-text-1: #f7f8f8;
-  --linear-text-2: #d0d6e0;
-  --linear-text-3: #8a8f98;
-  --linear-text-4: #62666d;
+  --linear-text-1: #26397A;
+  --linear-text-2: #3a4f9a;
+  --linear-text-3: #6b7db3;
+  --linear-text-4: #a8b4d4;
 
   /* ── Brand ── */
-  --linear-brand:         #5e6ad2;
-  --linear-accent:        #7170ff;
-  --linear-accent-hover:  #828fff;
+  --linear-brand:         #26397A;
+  --linear-accent:        #3a4f9a;
+  --linear-accent-hover:  #4d619e;
   --linear-success:       #10b981;
 
   /* ── Borders ── */
-  --linear-border:        rgba(255, 255, 255, 0.08);
-  --linear-border-subtle: rgba(255, 255, 255, 0.05);
+  --linear-border:        #e8dcc8;
+  --linear-border-subtle: #f0e8d8;
 
-  /* ── Compat aliases (old warm tokens → cool indigo) ── */
-  --brand-500:        #7170ff;
-  --brand-600:        #5e6ad2;
-  --brand-gold:       #828fff;
-  --terracotta:       #8a8f98;
-  --terracotta-light: #d0d6e0;
+  /* ── Charts — navy family ── */
+  --chart-1: #26397A;
+  --chart-2: #3a4f9a;
+  --chart-3: #10b981;
+  --chart-4: #6b7db3;
+  --chart-5: #a8b4d4;
+}
+
+.dark {
+  /* ── Finnovo dark variant — navy surface, cream accent ── */
+  --background: #0e1527;
+  --foreground: #F4E5CC;
+
+  --card: #162040;
+  --card-foreground: #F4E5CC;
+
+  --popover: #162040;
+  --popover-foreground: #F4E5CC;
+
+  --primary: #F4E5CC;
+  --primary-foreground: #26397A;
+
+  --secondary: #1e2f5e;
+  --secondary-foreground: #F4E5CC;
+
+  --muted: #0e1527;
+  --muted-foreground: #a8b4d4;
+
+  --accent: #3a4f9a;
+  --accent-foreground: #ffffff;
+
+  --destructive: oklch(0.65 0.22 28);
+  --destructive-foreground: #F4E5CC;
+
+  --border: rgba(244, 229, 204, 0.12);
+  --input: rgba(244, 229, 204, 0.12);
+  --ring: rgba(244, 229, 204, 0.3);
+
+  --chart-1: #F4E5CC;
+  --chart-2: #a8b4d4;
+  --chart-3: #10b981;
+  --chart-4: #6b7db3;
+  --chart-5: #3a4f9a;
+
+  /* ── Surface scale ── */
+  --linear-bg-0: #080d1a;
+  --linear-bg-1: #0e1527;
+  --linear-bg-2: #162040;
+  --linear-bg-3: #1e2f5e;
+  --linear-bg-4: #26397A;
+
+  /* ── Text hierarchy ── */
+  --linear-text-1: #F4E5CC;
+  --linear-text-2: #d4c3a0;
+  --linear-text-3: #a8b4d4;
+  --linear-text-4: #6b7db3;
+
+  /* ── Brand ── */
+  --linear-brand:         #F4E5CC;
+  --linear-accent:        #a8b4d4;
+  --linear-accent-hover:  #d4c3a0;
+  --linear-success:       #10b981;
+
+  /* ── Borders ── */
+  --linear-border:        rgba(244, 229, 204, 0.12);
+  --linear-border-subtle: rgba(244, 229, 204, 0.07);
+
+  /* ── Compat aliases ── */
+  --brand-500:        #a8b4d4;
+  --brand-600:        #F4E5CC;
+  --brand-gold:       #d4c3a0;
+  --terracotta:       #a8b4d4;
+  --terracotta-light: #d4c3a0;
 }
 
 @theme inline {
@@ -133,6 +171,17 @@
   --color-brand-gold: var(--brand-gold);
   --color-terracotta: var(--terracotta);
   --color-terracotta-light: var(--terracotta-light);
+  /* Cream scale */
+  --color-cream-50:  var(--cream-50);
+  --color-cream-100: var(--cream-100);
+  --color-cream-200: var(--cream-200);
+  --color-cream-300: var(--cream-300);
+  --color-cream-400: var(--cream-400);
+  /* Navy scale */
+  --color-navy-900: var(--navy-900);
+  --color-navy-700: var(--navy-700);
+  --color-navy-500: var(--navy-500);
+  --color-navy-300: var(--navy-300);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);

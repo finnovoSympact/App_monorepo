@@ -2,32 +2,30 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { ChatOpenAI } from "@langchain/openai";
 
 /**
- * Central AI client factory — powered by Groq (OpenAI-compatible).
+ * Central AI client factory — powered by Groq (free, no billing required).
  *
  * Env vars:
- *   GROQ_API_KEY      — required
- *   OPENAI_BASE_URL   — defaults to https://api.groq.com/openai/v1
+ *   GROQ_API_KEY  — Groq API key (free at console.groq.com)
+ *
+ * Free models used:
+ *   llama-3.1-8b-instant   — fast/cheap (6000 req/min free)
+ *   llama-3.3-70b-versatile — smart/strong (600 req/min free)
  */
 
-function groqBaseURL(): string {
-  return process.env.OPENAI_BASE_URL ?? "https://api.groq.com/openai/v1";
-}
-
-// AI SDK client (for streaming routes / generateText)
 const groq = createOpenAI({
-  baseURL: groqBaseURL(),
+  baseURL: "https://api.groq.com/openai/v1",
   apiKey: process.env.GROQ_API_KEY ?? "",
 });
 
 export const models = {
-  /** Fast, cheap — classifiers, routers, cheap agents. */
+  /** Fast, cheap — classifiers, routers, quick responses. */
   fast: groq("llama-3.1-8b-instant"),
   /** Smart default — most agent steps. */
   smart: groq("llama-3.3-70b-versatile"),
   /** Maximum capability — critic/reviewer loops. */
   strong: groq("llama-3.3-70b-versatile"),
   /** Lightweight fallback. */
-  fallback: groq("gemma2-9b-it"),
+  fallback: groq("llama-3.1-8b-instant"),
 } as const;
 
 export type ModelKey = keyof typeof models;
@@ -44,9 +42,9 @@ export function getLangchainModel(
   return new ChatOpenAI({
     modelName,
     temperature: tier === "fast" ? 0.1 : 0.2,
+    openAIApiKey: process.env.GROQ_API_KEY ?? "",
     configuration: {
-      baseURL: groqBaseURL(),
-      apiKey: process.env.GROQ_API_KEY ?? "",
+      baseURL: "https://api.groq.com/openai/v1",
     },
   });
 }

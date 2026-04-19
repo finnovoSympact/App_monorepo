@@ -63,6 +63,13 @@ export function WhatsappChat({ messages, onSend, isTyping }: Props) {
         )}
         <div ref={bottomRef} />
       </div>
+      {/* Security disclaimer — never share CIN/bank details in chat */}
+      <div className="flex items-start gap-2 border-t border-white/10 bg-[#0d2137] px-4 py-2.5">
+        <span className="mt-0.5 text-[10px] leading-relaxed text-amber-400/80">
+          🔒 For your security, <strong>never type your CIN number or exact bank details</strong> here.
+          Sensitive documents are collected via a secure, Tunisian-hosted link.
+        </span>
+      </div>
       {/* Input */}
       <div className="flex items-center gap-2 border-t border-white/10 bg-[#1a2f45] px-4 py-3">
         <Input

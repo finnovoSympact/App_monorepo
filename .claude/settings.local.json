@@ -17,7 +17,11 @@
       "Bash(npx prettier:*)",
       "Bash(pnpm approve-builds:*)",
       "Bash(pnpm install:*)",
-      "Bash(pnpm remove:*)"
+      "Bash(pnpm remove:*)",
+      "Bash(xargs grep:*)",
+      "Bash(npx tsc:*)",
+      "Bash(timeout 15 pnpm dev)",
+      "mcp__claude_ai_Excalidraw__read_me"
     ]
   }
 }

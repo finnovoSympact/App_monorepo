@@ -12,12 +12,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ExternalLink, Award, Clock } from "lucide-react";
+import { ExternalLink, Award, Clock, X, Brain } from "lucide-react";
 
 interface HitlState {
   nodeKey: string;
   nodeLabel: string;
   summary: string;
+}
+
+interface NodeDetailState {
+  node: PipelineNode;
+  events: TraceEvent[];
 }
 
 import { Suspense } from "react";
@@ -42,110 +47,183 @@ function PipelinePageInner({ params }: { params: { runId: string } }) {
   const [passportId, setPassportId] = useState<string | null>(null);
   const [creditScore, setCreditScore] = useState<number | null>(null);
   const [isRunning, setIsRunning] = useState(true);
+  // Server-assigned runId (from SSE "start" event) — needed to resume graph after HITL
+  const [liveRunId, setLiveRunId] = useState<string | null>(null);
+  // Per-node event map for the detail panel
+  const [nodeEvents, setNodeEvents] = useState<Map<string, TraceEvent[]>>(new Map());
+  const [nodeDetail, setNodeDetail] = useState<NodeDetailState | null>(null);
 
   useEffect(() => {
-    if (!isOffline) {
-      // TODO: Real SSE streaming when API is ready
-      setTimeout(() => setIsRunning(false), 0);
+    if (isOffline) {
+      // ── Offline: load canned trace ─────────────────────────────────────────
+      fetch("/demo/canned-trace.json")
+        .then((r) => r.json())
+        .then((data) => {
+          let cumulativeDelay = 0;
+          data.steps.forEach(
+            (
+              step: { delayMs: number; nodeKey: string; event: { agent: string; summary: string; kind: string; status: string } },
+              idx: number,
+            ) => {
+              cumulativeDelay += step.delayMs;
+              setTimeout(() => {
+                const { nodeKey, event } = step;
+                setNodes((prev) =>
+                  prev.map((n) =>
+                    n.key === nodeKey ? { ...n, status: event.status as PipelineNode["status"] } : n,
+                  ),
+                );
+                setActiveNode(nodeKey);
+                if (event.kind !== "hitl") {
+                  const ev: TraceEvent = { agent: event.agent, summary: event.summary, at: Date.now(), kind: "out", nodeKey };
+                  setTraceEvents((prev) => [ev, ...prev]);
+                  setNodeEvents((prev) => {
+                    const updated = new Map(prev);
+                    updated.set(nodeKey, [...(updated.get(nodeKey) ?? []), ev]);
+                    return updated;
+                  });
+                }
+                if (event.kind === "hitl") {
+                  setHitlState({ nodeKey, nodeLabel: nodes.find((n) => n.key === nodeKey)?.label || nodeKey, summary: event.summary });
+                }
+                if (nodeKey === "e_finalizer" && event.status === "completed") {
+                  setPassportId(data.passport.id);
+                  setCreditScore(data.passport.creditScore);
+                  setIsRunning(false);
+                }
+                if (idx === data.steps.length - 1) setTimeout(() => setActiveNode(null), 1000);
+              }, cumulativeDelay);
+            },
+          );
+        })
+        .catch((err) => { console.error("Failed to load canned trace:", err); setIsRunning(false); });
       return;
     }
 
-    // Load canned trace for offline demo
-    fetch("/demo/canned-trace.json")
-      .then((r) => r.json())
-      .then((data) => {
-        let cumulativeDelay = 0;
+    // ── Live: real SSE from /api/pipeline/run ─────────────────────────────────
+    let aborted = false;
 
-        data.steps.forEach(
-          (
-            step: {
-              delayMs: number;
-              nodeKey: string;
-              event: {
-                agent: string;
-                summary: string;
-                kind: string;
-                status: string;
-              };
-            },
-            idx: number,
-          ) => {
-            cumulativeDelay += step.delayMs;
+    async function startLiveStream() {
+      try {
+        const res = await fetch("/api/pipeline/run", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ smeId, goal }),
+        });
+        if (!res.body) { setIsRunning(false); return; }
 
-            setTimeout(() => {
-              const { nodeKey, event } = step;
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buf = "";
 
-              // Update node status
-              setNodes((prev) =>
-                prev.map((n) =>
-                  n.key === nodeKey ? { ...n, status: event.status as PipelineNode["status"] } : n,
-                ),
-              );
+        while (!aborted) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buf += decoder.decode(value, { stream: true });
 
+          // Parse SSE frames
+          const frames = buf.split("\n\n");
+          buf = frames.pop() ?? "";
+
+          for (const frame of frames) {
+            const eventMatch = frame.match(/^event: (\w+)/m);
+            const dataMatch = frame.match(/^data: (.+)$/m);
+            if (!eventMatch || !dataMatch) continue;
+            const eventType = eventMatch[1];
+            let payload: Record<string, unknown>;
+            try { payload = JSON.parse(dataMatch[1]); } catch { continue; }
+
+            if (eventType === "start") {
+              setLiveRunId(payload.runId as string);
+            } else if (eventType === "trace") {
+              const nodeKey = payload.nodeKey as string;
               setActiveNode(nodeKey);
+              setNodes((prev) =>
+                prev.map((n) => n.key === nodeKey ? { ...n, status: payload.status as PipelineNode["status"] ?? "running" } : n),
+              );
+              const newEvent: TraceEvent = {
+                agent: payload.agent as string,
+                summary: payload.summary as string,
+                at: Date.now(),
+                kind: "out",
+                nodeKey,
+                reasoning: payload.reasoning as string | undefined,
+              };
+              setTraceEvents((prev) => [newEvent, ...prev]);
+              // Bucket per node for detail panel
+              setNodeEvents((prev) => {
+                const updated = new Map(prev);
+                updated.set(nodeKey, [...(updated.get(nodeKey) ?? []), newEvent]);
+                return updated;
+              });
+            } else if (eventType === "node_done") {
+              const nodeKey = payload.nodeKey as string;
+              setNodes((prev) =>
+                prev.map((n) => n.key === nodeKey ? { ...n, status: "completed" } : n),
+              );
+            } else if (eventType === "hitl") {
+              const nodeKey = (payload.nodeKey as string) ?? "c_executor";
+              const hitlPayload = payload.payload as Record<string, unknown>;
+              setNodes((prev) =>
+                prev.map((n) => n.key === nodeKey ? { ...n, status: "waiting" } : n),
+              );
+              setHitlState({
+                nodeKey,
+                nodeLabel: nodes.find((n) => n.key === nodeKey)?.label || nodeKey,
+                summary: (hitlPayload?.question as string) ?? "Review required before continuing",
+              });
+            } else if (eventType === "passport") {
+              setPassportId(payload.id as string);
+              setCreditScore(payload.creditScore as number);
+            } else if (eventType === "done") {
+              setIsRunning(false);
+              setActiveNode(null);
+            } else if (eventType === "error") {
+              console.error("Pipeline error:", payload.message);
+              setIsRunning(false);
+            }
+          }
+        }
+      } catch (err) {
+        if (!aborted) { console.error("SSE error:", err); setIsRunning(false); }
+      }
+    }
 
-              // Add trace event
-              if (event.kind !== "hitl") {
-                setTraceEvents((prev) => [
-                  {
-                    agent: event.agent,
-                    summary: event.summary,
-                    at: Date.now(),
-                    kind: "out",
-                  },
-                  ...prev,
-                ]);
-              }
-
-              // Handle HITL checkpoint
-              if (event.kind === "hitl") {
-                setHitlState({
-                  nodeKey,
-                  nodeLabel: nodes.find((n) => n.key === nodeKey)?.label || nodeKey,
-                  summary: event.summary,
-                });
-              }
-
-              // Handle finalizer completion
-              if (nodeKey === "e_finalizer" && event.status === "completed") {
-                setPassportId(data.passport.id);
-                setCreditScore(data.passport.creditScore);
-                setIsRunning(false);
-              }
-
-              // Last step
-              if (idx === data.steps.length - 1) {
-                setTimeout(() => setActiveNode(null), 1000);
-              }
-            }, cumulativeDelay);
-          },
-        );
-      })
-      .catch((err) => {
-        console.error("Failed to load canned trace:", err);
-        setIsRunning(false);
-      });
+    startLiveStream();
+    return () => { aborted = true; };
   }, [isOffline]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleHitlAction = async (action: "approve" | "refine" | "takeover", feedback?: string) => {
-    console.log("HITL action:", action, feedback);
-    // Clear HITL state and continue
+    const currentHitl = hitlState;
     setHitlState(null);
 
-    // Update node to completed
-    if (hitlState) {
+    if (currentHitl) {
       setNodes((prev) =>
         prev.map((n) =>
-          n.key === hitlState.nodeKey
-            ? {
-                ...n,
-                status: "completed",
-                hitlMode:
-                  action === "approve" ? "ai" : action === "refine" ? "ai_refined" : "manual",
-              }
+          n.key === currentHitl.nodeKey
+            ? { ...n, status: "completed", hitlMode: action === "approve" ? "ai" : action === "refine" ? "ai_refined" : "manual" }
             : n,
         ),
       );
+    }
+
+    // POST to HITL endpoint to resume the paused graph
+    const runIdToUse = liveRunId ?? params.runId;
+    if (!isOffline && runIdToUse) {
+      try {
+        await fetch("/api/pipeline/hitl", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            runId: runIdToUse,
+            nodeKey: currentHitl?.nodeKey ?? "c_executor",
+            mode: action,
+            feedback: feedback ?? "",
+          }),
+        });
+      } catch (err) {
+        console.error("HITL resume failed:", err);
+      }
     }
   };
 
@@ -177,7 +255,11 @@ function PipelinePageInner({ params }: { params: { runId: string } }) {
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Left column - Pipeline + Trace log */}
           <div className="space-y-6 lg:col-span-2">
-            <PipelineGraph nodes={nodes} activeNode={activeNode} />
+            <PipelineGraph
+              nodes={nodes}
+              activeNode={activeNode}
+              onNodeClick={(node) => setNodeDetail({ node, events: nodeEvents.get(node.key) ?? [] })}
+            />
 
             <Card className="border-border/60">
               <CardHeader>
@@ -300,6 +382,73 @@ function PipelinePageInner({ params }: { params: { runId: string } }) {
             summary={hitlState.summary}
             onAction={handleHitlAction}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Node Detail Drawer — click any completed node to inspect */}
+      <AnimatePresence>
+        {nodeDetail && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setNodeDetail(null)}
+              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+            />
+            {/* Panel */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 280 }}
+              className="fixed right-0 top-0 z-50 flex h-full w-full max-w-lg flex-col border-l border-border/60 bg-card shadow-2xl"
+            >
+              <div className="flex items-center justify-between border-b border-border/40 px-6 py-4">
+                <div className="flex items-center gap-3">
+                  <Brain className="size-5 text-indigo-400" />
+                  <div>
+                    <p className="font-semibold">{nodeDetail.node.label}</p>
+                    <p className="text-muted-foreground text-xs capitalize">{nodeDetail.node.status}</p>
+                  </div>
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => setNodeDetail(null)}>
+                  <X className="size-4" />
+                </Button>
+              </div>
+
+              <ScrollArea className="flex-1 px-6 py-4">
+                {nodeDetail.events.length === 0 ? (
+                  <p className="text-muted-foreground text-sm">No events recorded for this node yet.</p>
+                ) : (
+                  <div className="space-y-6">
+                    {nodeDetail.events.map((ev, i) => (
+                      <div key={i} className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-[10px] uppercase">{ev.agent}</Badge>
+                          <span className="text-muted-foreground text-xs">
+                            {new Date(ev.at).toLocaleTimeString("fr-TN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                          </span>
+                        </div>
+                        <p className="text-sm leading-relaxed">{ev.summary}</p>
+                        {ev.reasoning && (
+                          <details open className="mt-2">
+                            <summary className="cursor-pointer text-xs font-medium text-indigo-400 hover:text-indigo-300 select-none">
+                              🤖 LLM reasoning ▸
+                            </summary>
+                            <pre className="mt-2 overflow-x-auto rounded-md bg-muted/50 p-3 font-mono text-xs leading-relaxed whitespace-pre-wrap text-muted-foreground">
+                              {ev.reasoning}
+                            </pre>
+                          </details>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </ScrollArea>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </main>

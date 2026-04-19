@@ -5,6 +5,7 @@ const TOKEN = process.env.WHATSAPP_TOKEN ?? "";
 const META_URL = `https://graph.facebook.com/v18.0/${PHONE_ID}/messages`;
 
 async function metaPost(payload: Record<string, unknown>): Promise<void> {
+  console.log("[WA client] POST", META_URL, "to:", payload.to, "type:", payload.type);
   const res = await fetch(META_URL, {
     method: "POST",
     headers: {
@@ -15,8 +16,10 @@ async function metaPost(payload: Record<string, unknown>): Promise<void> {
   });
   if (!res.ok) {
     const text = await res.text();
+    console.error("[WA client] ❌ Meta API error", res.status, text.slice(0, 200));
     throw new Error(`Meta API ${res.status}: ${text}`);
   }
+  console.log("[WA client] ✅ Meta API", res.status);
 }
 
 export async function sendText(to: string, text: string): Promise<void> {

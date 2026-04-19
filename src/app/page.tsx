@@ -1,6 +1,7 @@
 "use client";
 
 import { Hero } from "@/components/hero";
+import { PricingSection } from "@/components/pricing";
 import { motion } from "framer-motion";
 import { MessageSquare, FileCheck } from "lucide-react";
 import { ChapterMark, Kicker, DisplayTitle, Hairline, Stamp } from "@/components/sanad/type";
@@ -139,6 +140,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ── Pricing ── */}
+      <PricingSection />
 
       {/* ── Footer ── */}
       <footer className="border-t px-6 py-10" style={{ borderColor: "var(--border)" }}>

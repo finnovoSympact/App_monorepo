@@ -12,6 +12,8 @@ export type TraceEvent = {
   summary: string;
   at: number;
   kind: "in" | "out";
+  nodeKey?: string;
+  reasoning?: string;
 };
 
 const agentColor: Record<string, string> = {

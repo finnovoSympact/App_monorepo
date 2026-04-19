@@ -17,6 +17,7 @@ import {
   X,
   ArrowRight,
   AlertCircle,
+  ShieldCheck,
 } from "lucide-react";
 
 interface UploadedFile {
@@ -38,6 +39,7 @@ export default function UploadPage() {
   const [goal, setGoal] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [honorDeclared, setHonorDeclared] = useState(false);
 
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -239,13 +241,51 @@ export default function UploadPage() {
           </div>
         </div>
 
+        {/* Déclaration sur l'Honneur — legal liability shield (per spec) */}
+        <div
+          className={`rounded-xl border p-4 transition-colors ${
+            honorDeclared
+              ? "border-[#26397A]/30 bg-[#26397A]/5"
+              : "border-amber-300/50 bg-amber-50/60"
+          }`}
+        >
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              checked={honorDeclared}
+              onChange={(e) => setHonorDeclared(e.target.checked)}
+              className="mt-0.5 size-4 shrink-0 accent-[#26397A]"
+            />
+            <span className="text-sm leading-relaxed" style={{ color: "var(--foreground)" }}>
+              <strong>Déclaration sur l&apos;Honneur —</strong> Je certifie sur l&apos;honneur que les
+              documents financiers fournis sont exacts, sincères et conformes aux déclarations
+              fiscales soumises aux Autorités Fiscales Tunisiennes (Recette des Finances).
+              <span className="text-muted-foreground ml-1 text-xs">
+                (I certify that the financial documents provided are exact and conform to tax declarations.)
+              </span>
+            </span>
+          </label>
+          {!honorDeclared && (
+            <p className="mt-2 flex items-center gap-1.5 text-xs text-amber-700">
+              <AlertCircle className="size-3.5 shrink-0" />
+              You must accept this declaration before submitting your documents.
+            </p>
+          )}
+          {honorDeclared && (
+            <p className="mt-2 flex items-center gap-1.5 text-xs" style={{ color: "#26397A" }}>
+              <ShieldCheck className="size-3.5 shrink-0" />
+              Declaration accepted — your submission is legally binding under Tunisian law.
+            </p>
+          )}
+        </div>
+
         {/* Submit */}
         <div className="space-y-3">
           <Button
             size="lg"
             className="w-full"
             onClick={handleSubmit}
-            disabled={files.length === 0 || !goal.trim() || isSubmitting}
+            disabled={files.length === 0 || !goal.trim() || isSubmitting || !honorDeclared}
           >
             {isSubmitting ? (
               "Starting pipeline..."

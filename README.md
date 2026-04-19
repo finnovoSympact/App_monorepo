@@ -1,76 +1,146 @@
-# Finnovo
+# Finnovo — Daiyn & Sanad
 
-A multi-agent credit passport platform, built for the Sanad hackathon at INSAT (2026-04-18).
+A multi-agent credit passport platform for SMEs in Tunisia, built for the INSAT hackathon (2026-04-18).
 
-**Core idea.** A supervisor agent dispatches specialist agents (fundamentals, news, risk, critic, composer) that collaborate to answer financial questions. The UI streams their reasoning trace live — the transparency _is_ the product.
+**The product has two layers:**
+- **Sanad Chat** — a WhatsApp-native financial advisor that builds a user's credit profile through natural conversation (Darija / French / Arabic)
+- **Daiyn** — a 5-node LangGraph pipeline that underwrites SME credit files and issues a signed Sanad Passport
+
+The demo wow: a **live agent trace panel** that shows the supervisor → specialist → critic chain producing a grounded, citeable credit score in real time.
 
 ## Quick start
 
 ```bash
-# Requires Node 20+ and pnpm 10+.
+# Requires Node 20+ and pnpm 10+
 pnpm install
-cp .env.example .env.local   # then fill in ANTHROPIC_API_KEY
-pnpm dev                     # http://localhost:3000
+cp .env.example .env       # fill in GROQ_API_KEY (OpenRouter key works too)
+pnpm dev                   # http://localhost:3000
 ```
 
-Open `/` for the landing, `/playground` for the live agent demo, `/dashboard` for the finance UI shell.
+Pages: `/` landing · `/chat` Sanad Chat demo · `/dashboard` finance shell · `/dashboard/pipeline/demo?offline=1` pipeline demo
 
-## The stack
+## Environment variables
 
-| Layer         | Choice                                                  |
-| ------------- | ------------------------------------------------------- |
-| Framework     | Next.js 16 (App Router, React 19, Turbopack)            |
-| Language      | TypeScript (`strict: true`)                             |
-| Styling       | Tailwind CSS v4 + shadcn/ui (New York, neutral)         |
-| Agents        | LangGraph supervisor pattern                            |
-| LLMs          | Anthropic (`@ai-sdk/anthropic`, `@langchain/anthropic`) |
-| DB (optional) | Postgres + Drizzle ORM                                  |
-| Charts        | Recharts                                                |
-| Motion        | Framer Motion                                           |
-| Deploy        | Vercel                                                  |
+| Variable | Required | Description |
+|---|---|---|
+| `GROQ_API_KEY` | **Yes** | OpenRouter or Groq API key |
+| `OPENAI_BASE_URL` | No | Defaults to `https://api.groq.com/openai/v1`. Set to `https://openrouter.ai/api/v1` for OpenRouter |
+| `DATABASE_URL` | No | Postgres connection string (Neon). App boots without it |
+| `WHATSAPP_LIVE` | No | Set to `1` to enable real Meta Cloud API sends |
+| `WHATSAPP_TOKEN` | If live | Meta Cloud API bearer token |
+| `WHATSAPP_PHONE_ID` | If live | Meta phone number ID |
+| `WHATSAPP_VERIFY_TOKEN` | If live | Webhook verify token (any string you choose) |
+| `WHATSAPP_APP_SECRET` | If live | App secret for HMAC signature verification |
+| `SANAD_SIGNING_PRIVATE_KEY` | No | Ed25519 private key for passport signing (demo mode if unset) |
 
-## Layout
+## WhatsApp bot setup
+
+The bot is fully wired. When you send a WhatsApp message to the business number, it replies via the AI conversational agent.
+
+**To run locally:**
+
+1. Start the dev server: `pnpm dev`
+2. Start the ngrok tunnel: `ngrok start whatsapp --config ngrok.yml`
+3. Copy the public URL (e.g. `https://xxxx.ngrok-free.app`)
+4. In [Meta Developer Console](https://developers.facebook.com) → WhatsApp → Configuration → Webhook:
+   - Callback URL: `https://xxxx.ngrok-free.app/api/whatsapp/webhook`
+   - Verify token: value of `WHATSAPP_VERIFY_TOKEN` in your `.env`
+   - Subscribe to: `messages`
+5. Send a WhatsApp message to the test number → get an AI reply
+
+> **Note:** ngrok free tier gives a new URL on every restart. Keep it running during the demo; update the Meta webhook URL if you restart.
+
+## Architecture
+
+```
+WhatsApp user
+    │
+    ▼
+/api/whatsapp/webhook          ← Meta Cloud API webhook
+    │  processConversationTurn()
+    │  (LangGraph conversational agent — Llama 3.3 via OpenRouter)
+    ▼
+Sanad Chat session             ← in-memory profile extraction
+    │  sme_signal ≥ 2
+    ▼
+Daiyn pipeline trigger
+    │
+    ├─ Node a: Formatter       ← parse uploaded docs
+    ├─ Node b: Orchestrator    ← LLM task planning
+    ├─ Node c: Executor        ← KPI math + risk flagging + HITL interrupt
+    ├─ Node d: Reviewer        ← anti-hallucination gate + P&L reconciliation
+    └─ Node e: Finalizer       ← Ed25519 signed Sanad Passport
+                │
+                ▼
+        /passport/:id          ← verifiable credit passport
+        /bank/leads            ← Layer 3: surfaced to bank partners
+```
+
+## Stack
+
+| Layer | Choice |
+|---|---|
+| Framework | Next.js 16 (App Router, React 19, Turbopack) |
+| Language | TypeScript `strict: true` |
+| Styling | Tailwind CSS v4 + shadcn/ui (New York, neutral) |
+| Agents | LangGraph `@langchain/langgraph` v1.2 — supervisor pattern |
+| LLMs | Llama 3.3 70B + 3.1 8B via OpenRouter (free tier) |
+| DB (optional) | Postgres + Drizzle ORM |
+| Charts | Recharts |
+| Motion | Framer Motion |
+| WhatsApp | Meta Cloud API |
+
+## File layout
 
 ```
 src/
 ├── app/
-│   ├── page.tsx                # marketing landing
-│   ├── playground/page.tsx     # live agent demo (SSE)
-│   ├── dashboard/page.tsx      # finance UI shell
-│   └── api/agents/route.ts     # streaming agent endpoint
+│   ├── page.tsx                          # landing
+│   ├── chat/page.tsx                     # Sanad Chat UI
+│   ├── dashboard/
+│   │   ├── page.tsx                      # runs + passports overview
+│   │   ├── pipeline/[runId]/page.tsx     # live pipeline view (SSE)
+│   │   └── upload/page.tsx              # document upload
+│   ├── bank/leads/page.tsx               # Layer 3 bank portal
+│   ├── passport/[id]/page.tsx            # signed passport viewer
+│   ├── verify/[id]/page.tsx              # passport verification
+│   └── api/
+│       ├── chat/turn/route.ts            # conversational agent endpoint
+│       ├── pipeline/
+│       │   ├── run/route.ts              # SSE pipeline stream
+│       │   └── hitl/route.ts            # resume paused graph
+│       └── whatsapp/webhook/route.ts    # Meta Cloud API webhook
 ├── components/
-│   ├── agent-trace.tsx         # live reasoning panel — the wow factor
-│   ├── hero.tsx
-│   ├── site-nav.tsx
-│   ├── number-ticker.tsx
-│   ├── finance-chart.tsx
-│   └── ui/                     # shadcn primitives
+│   ├── agent-trace.tsx                   # live reasoning panel
+│   ├── pipeline-graph.tsx                # 5-node graph visualization
+│   ├── hitl-panel.tsx                    # human-in-the-loop overlay
+│   ├── whatsapp-chat.tsx                 # WhatsApp-styled chat UI
+│   └── ui/                              # shadcn primitives
 └── lib/
     ├── ai/
-    │   ├── client.ts           # model registry (fast / smart / strong)
+    │   ├── client.ts                     # model registry (OpenRouter)
     │   └── agents/
-    │       └── supervisor.ts   # LangGraph multi-agent graph
-    ├── db/
-    │   ├── client.ts           # Drizzle client (optional)
-    │   └── schema.ts
-    └── utils.ts                # cn, formatTND, formatCompact
+    │       ├── conversational.ts         # Sanad Chat agent
+    │       ├── pipeline.ts               # Daiyn 5-node LangGraph
+    │       └── supervisor.ts            # multi-agent supervisor
+    ├── ai/tools/
+    │   ├── kpi.ts                        # deterministic KPI math
+    │   ├── benchmarks.ts                 # sector benchmark fixtures
+    │   └── risk.ts                       # risk flag factory
+    ├── db/schema.ts                      # Drizzle schema (3-layer)
+    ├── whatsapp/client.ts                # Meta Cloud API client
+    └── signing/passport.ts              # Ed25519 passport signing
 ```
 
 ## Scripts
 
-- `pnpm dev` — dev server with Turbopack
+- `pnpm dev` — dev server (Turbopack, :3000)
 - `pnpm build` — production build
-- `pnpm check` — typecheck + lint + format-check (run before every commit)
-- `pnpm db:generate && pnpm db:migrate` — if you touch the schema
+- `pnpm check` — typecheck + lint + format-check (run before commits)
+- `pnpm db:generate && pnpm db:migrate` — regenerate and apply DB migrations
 
-## Documentation
+## Key docs
 
-- `IDEAS.md` — the shortlist of hackathon concepts. Read this before you plan.
-- `PLAYBOOK.md` — hour-by-hour plan for the 24h run.
-- `GITHUB_SETUP.md` — one-time org + repo creation commands.
-- `CLAUDE.md` — conventions loaded by Claude Code automatically.
-- `.claude/` — subagents, slash commands, hooks, and MCP config.
-
-## License
-
-MIT — built for the Finnovo 2026 hackathon.
+- `IDEAS.md` — hackathon concept shortlist
+- `CLAUDE.md` — conventions for Claude Code
+- `.claude/` — subagents, slash commands, hooks

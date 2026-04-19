@@ -1,3 +1,7 @@
 version: 3
 agent:
   authtoken: 3CY4cmJAEy0GWrWbaSEgjacTJjI_27DgUnW5mpESRJB1hKYEH
+tunnels:
+  whatsapp:
+    proto: http
+    addr: 3000

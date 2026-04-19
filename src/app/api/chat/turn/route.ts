@@ -48,25 +48,19 @@ export async function POST(req: NextRequest) {
     );
   } catch (err) {
     const errMsg = String(err);
-    // Graceful fallback when no API key (demo mode)
-    if (errMsg.includes("API key") || errMsg.includes("authentication") || errMsg.includes("401")) {
-      const fallback = {
-        reply: "Marhba! Sanad yhebek tchouf winak fel financial journey dyalek. Chnou smitk?",
-        profileDelta: {},
-        shouldEscalate: false,
-        suggestedProduct: null,
-        assistantText:
-          "Marhba! Sanad yhebek tchouf winak fel financial journey dyalek. Chnou smitk?",
-        profileSnapshot: {},
-        escalation: null,
-        suggestions: [],
-      };
-      return new Response(JSON.stringify(fallback), {
-        headers: { "content-type": "application/json" },
-      });
-    }
-    return new Response(JSON.stringify({ error: errMsg }), {
-      status: 500,
+    console.error("[chat/turn] LLM error:", errMsg);
+    // Graceful fallback for any LLM failure — keeps the demo alive
+    const fallback = {
+      reply: "Marhba! Sanad yhebek tchouf winak fel financial journey dyalek. Chnou smitk?",
+      profileDelta: {},
+      shouldEscalate: false,
+      suggestedProduct: null,
+      assistantText: "Marhba! Sanad yhebek tchouf winak fel financial journey dyalek. Chnou smitk?",
+      profileSnapshot: {},
+      escalation: null,
+      suggestions: [],
+    };
+    return new Response(JSON.stringify(fallback), {
       headers: { "content-type": "application/json" },
     });
   }

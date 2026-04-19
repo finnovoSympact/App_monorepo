@@ -3,15 +3,15 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArabicGlyph } from "@/components/sanad/arabic-mark";
 import {
   TrendingUp,
   Users,
   Flame,
-  Euro,
+  Banknote,
   ArrowRight,
   Building2,
   MapPin,
@@ -83,10 +83,10 @@ export default function BankPage() {
       color: "text-emerald-600",
     },
     {
-      icon: Euro,
+      icon: Banknote,
       label: "Revenue earned",
-      value: "105 EUR",
-      color: "text-indigo-400",
+      value: "315 TND",
+      color: "text-[#26397A]",
     },
   ];
 
@@ -108,11 +108,10 @@ export default function BankPage() {
       <aside className="border-border/60 bg-card/50 w-64 border-r p-6">
           <div className="mb-8">
             <div className="mb-2 flex items-center gap-2">
-              <ArabicGlyph char="ب" size={32} />
-            <span className="font-semibold">Sanad for Banks</span>
+              <Image src="/logo.svg" alt="Finnovo" width={90} height={50} className="h-7 w-auto" />
+            </div>
+            <p className="text-muted-foreground text-xs">Officer Portal</p>
           </div>
-          <p className="text-muted-foreground text-xs">Officer Portal</p>
-        </div>
 
           <nav aria-label="Bank officer navigation" className="space-y-1">
           <Link
