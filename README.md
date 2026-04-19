@@ -1,12 +1,13 @@
 # Finnovo — Daiyn & Sanad
 
-A multi-agent credit passport platform for SMEs in Tunisia, built for the INSAT hackathon (2026-04-18).
+A multi-agent credit passport platform for SMEs in Tunisia, built for the UIK Fintech hackathon (2026-04-18).
 
-**The product has two layers:**
+**The product has Three layers:**
 - **Sanad Chat** — a WhatsApp-native financial advisor that builds a user's credit profile through natural conversation (Darija / French / Arabic)
 - **Daiyn** — a 5-node LangGraph pipeline that underwrites SME credit files and issues a signed Sanad Passport
+- **Bank** - an observability dashboard for banks to monitor qualified leads for possible action taking
 
-The demo wow: a **live agent trace panel** that shows the supervisor → specialist → critic chain producing a grounded, citeable credit score in real time.
+The demo wow: a **live agent trace panel** that shows the supervisor → specialist → critic chain producing a grounded, citeable credit score in real time and a deployed ai chatbot on whatsapp.
 
 ## Quick start
 
