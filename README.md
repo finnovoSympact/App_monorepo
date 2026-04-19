@@ -53,6 +53,7 @@ The bot is fully wired. When you send a WhatsApp message to the business number,
 > **Note:** ngrok free tier gives a new URL on every restart. Keep it running during the demo; update the Meta webhook URL if you restart.
 
 ## Architecture
+[link to architecture diagram in Excalidraw:(C:\Users\talel\Desktop\finnovo_hackathon\Finnovo_hackathon\finnovo\image.png)]
 
 ```
 WhatsApp user
