@@ -77,6 +77,9 @@ export async function POST(req: NextRequest) {
           }
           send("node_done", { nodeKey, runId: body.runId });
 
+          // Demo pacing — match the drip speed from the initial run
+          await new Promise((r) => setTimeout(r, 1800));
+
           if (nodeKey === "e_finalizer" && nodeOutput.passportId) {
             send("passport", {
               id: nodeOutput.passportId,

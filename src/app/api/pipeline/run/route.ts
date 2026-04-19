@@ -117,6 +117,9 @@ export async function POST(req: NextRequest) {
 
           send("node_done", { nodeKey, runId });
 
+          // Slow drip for demo — judges see each node light up with a visible pause
+          await new Promise((r) => setTimeout(r, 1800));
+
           if (nodeKey === "e_finalizer" && nodeOutput.passportId) {
             send("passport", {
               id: nodeOutput.passportId,

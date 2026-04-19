@@ -17,7 +17,7 @@ cp .env.example .env       # fill in GROQ_API_KEY (OpenRouter key works too)
 pnpm dev                   # http://localhost:3000
 ```
 
-Pages: `/` landing · `/chat` Sanad Chat demo · `/dashboard` finance shell · `/dashboard/pipeline/demo?offline=1` pipeline demo
+Pages: `/` landing · `/login` sign in · `/chat` Sanad Chat (WhatsApp-style) · `/dashboard` SME pipeline · `/dashboard/pipeline/demo` live run · `/bank` bank portal · `/passport/:id` credit passport · `/verify/:id` verification
 
 ## Environment variables
 
@@ -32,6 +32,7 @@ Pages: `/` landing · `/chat` Sanad Chat demo · `/dashboard` finance shell · `
 | `WHATSAPP_VERIFY_TOKEN` | If live | Webhook verify token (any string you choose) |
 | `WHATSAPP_APP_SECRET` | If live | App secret for HMAC signature verification |
 | `SANAD_SIGNING_PRIVATE_KEY` | No | Ed25519 private key for passport signing (demo mode if unset) |
+| `NGROK_AUTHTOKEN` | If live | ngrok auth token for WhatsApp tunnel |
 
 ## WhatsApp bot setup
 
@@ -101,9 +102,15 @@ src/
 │   │   ├── page.tsx                      # runs + passports overview
 │   │   ├── pipeline/[runId]/page.tsx     # live pipeline view (SSE)
 │   │   └── upload/page.tsx              # document upload
-│   ├── bank/leads/page.tsx               # Layer 3 bank portal
+│   ├── login/page.tsx                    # mock auth (role picker)
+│   ├── signup/page.tsx                   # mock signup flow
+│   ├── bank/
+│   │   ├── page.tsx                      # bank dashboard
+│   │   ├── leads/page.tsx                # Layer 3: surfaced SME leads
+│   │   └── criteria/page.tsx             # lending criteria config
 │   ├── passport/[id]/page.tsx            # signed passport viewer
 │   ├── verify/[id]/page.tsx              # passport verification
+│   ├── consent/page.tsx                  # data-sharing consent
 │   └── api/
 │       ├── chat/turn/route.ts            # conversational agent endpoint
 │       ├── pipeline/
@@ -122,7 +129,7 @@ src/
     │   └── agents/
     │       ├── conversational.ts         # Sanad Chat agent
     │       ├── pipeline.ts               # Daiyn 5-node LangGraph
-    │       └── supervisor.ts            # multi-agent supervisor
+    │       └── supervisor.ts            # legacy multi-agent supervisor
     ├── ai/tools/
     │   ├── kpi.ts                        # deterministic KPI math
     │   ├── benchmarks.ts                 # sector benchmark fixtures

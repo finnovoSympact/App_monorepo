@@ -15,6 +15,7 @@ import { ChatOpenAI } from "@langchain/openai";
 const groq = createOpenAI({
   baseURL: "https://api.groq.com/openai/v1",
   apiKey: process.env.GROQ_API_KEY ?? "",
+  compatibility: "compatible",
 });
 
 export const models = {
