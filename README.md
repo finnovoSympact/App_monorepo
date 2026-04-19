@@ -1,3 +1,5 @@
+![Sanad Logo](./logo.svg)
+
 # Finnovo — Daiyn & Sanad
 
 A multi-agent credit passport platform for SMEs in Tunisia, built for the UIK Fintech hackathon (2026-04-18).
@@ -53,31 +55,18 @@ The bot is fully wired. When you send a WhatsApp message to the business number,
 > **Note:** ngrok free tier gives a new URL on every restart. Keep it running during the demo; update the Meta webhook URL if you restart.
 
 ## Architecture
-[link to architecture diagram in Excalidraw:(C:\Users\talel\Desktop\finnovo_hackathon\Finnovo_hackathon\finnovo\image.png)]
 
-```
-WhatsApp user
-    │
-    ▼
-/api/whatsapp/webhook          ← Meta Cloud API webhook
-    │  processConversationTurn()
-    │  (LangGraph conversational agent — Llama 3.3 via OpenRouter)
-    ▼
-Sanad Chat session             ← in-memory profile extraction
-    │  sme_signal ≥ 2
-    ▼
-Daiyn pipeline trigger
-    │
-    ├─ Node a: Formatter       ← parse uploaded docs
-    ├─ Node b: Orchestrator    ← LLM task planning
-    ├─ Node c: Executor        ← KPI math + risk flagging + HITL interrupt
-    ├─ Node d: Reviewer        ← anti-hallucination gate + P&L reconciliation
-    └─ Node e: Finalizer       ← Ed25519 signed Sanad Passport
-                │
-                ▼
-        /passport/:id          ← verifiable credit passport
-        /bank/leads            ← Layer 3: surfaced to bank partners
-```
+![System Architecture Diagram](./image.png)
+
+**Full system diagram** shows all 5 layers:
+- **Layer 1** — User Touchpoints: WhatsApp, Web Chat, Dashboard, Passport, Bank Portal, Auth
+- **Layer 2** — API Routes: SSE streaming endpoints for chat, pipeline, HITL, WhatsApp webhook, leads
+- **Layer 3** — LangGraph Agents: Conversational agent + 5-node Daiyn pipeline with `interrupt()` and revision loop
+- **Layer 4** — Deterministic Tools: KPI math, sector benchmarks, risk flags, Ed25519 signing
+- **Layer 5** — External Services: Groq API (Llama 3.3), Meta Cloud API, ngrok tunnel
+- **Data Layer** — In-memory stores (session, passport, graph state, leads) + optional Postgres
+
+Interactive version: [View on Excalidraw](https://excalidraw.com/#json=QZWK2nTO6aVOpj3AiubuX,IBapvgULukvZQlJP9T1ABQ)
 
 ## Stack
 
